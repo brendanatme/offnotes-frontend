@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
+import prettierPlugin from 'eslint-plugin-prettier'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
@@ -22,6 +23,7 @@ export default defineConfig([
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       semi: ['error', 'never'],
+      'prettier/prettier': 'error',
     },
   },
   {
@@ -37,6 +39,7 @@ export default defineConfig([
     },
     plugins: {
       '@typescript-eslint': tseslint,
+      prettier: prettierPlugin,
     },
     extends: [
       js.configs.recommended,
@@ -50,6 +53,7 @@ export default defineConfig([
         { varsIgnorePattern: '^[A-Z_]' },
       ],
       semi: ['error', 'never'],
+      'prettier/prettier': 'error',
       'no-shadow': 'off',
       '@typescript-eslint/no-shadow': 'error',
     },
