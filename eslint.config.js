@@ -21,6 +21,7 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      semi: ['error', 'never'],
     },
   },
   {
@@ -44,7 +45,11 @@ export default defineConfig([
     ],
     rules: {
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]' },
+      ],
+      semi: ['error', 'never'],
       'no-shadow': 'off',
       '@typescript-eslint/no-shadow': 'error',
     },
