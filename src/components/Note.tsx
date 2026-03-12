@@ -58,7 +58,7 @@ export default function Note() {
         dateRef.current.textContent = editedNote.date || ''
       }
       if (contentRef.current) {
-        contentRef.current.textContent = editedNote.content || ''
+        contentRef.current.innerText = editedNote.content || ''
       }
 
       // Focus title when creating a new note
@@ -232,7 +232,7 @@ export default function Note() {
         contentEditable
         suppressContentEditableWarning
         onInput={(e) =>
-          handleFieldChange('content', e.currentTarget.textContent || '')
+          handleFieldChange('content', e.currentTarget.innerText || '')
         }
         className="text-base text-neutral-300 flex-1 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text whitespace-pre-wrap text-left overflow-y-auto min-h-0"
       />
