@@ -5,6 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 import prettierPlugin from 'eslint-plugin-prettier'
+import importPlugin from 'eslint-plugin-import'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
@@ -35,11 +36,21 @@ export default defineConfig([
         ecmaVersion: 2020,
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
+        project: './tsconfig.json',
       },
     },
     plugins: {
       '@typescript-eslint': tseslint,
       prettier: prettierPlugin,
+      import: importPlugin,
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+      },
     },
     extends: [
       js.configs.recommended,
