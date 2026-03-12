@@ -13,6 +13,7 @@ export default function Note() {
     updateNote,
     isAddingNote,
     startAddNote,
+    stopAddNote,
   } = useNotes()
   const [isEditing, setIsEditing] = useState(false)
   const [editedNote, setEditedNote] = useState<Partial<NoteInterface> | null>(
@@ -119,6 +120,7 @@ export default function Note() {
           user: null,
         })
         selectNote(newNote)
+        stopAddNote()
       }
       setIsEditing(false)
       setEditedNote(null)
@@ -134,11 +136,13 @@ export default function Note() {
     createNote,
     selectNote,
     selectedFolder,
+    stopAddNote,
   ])
 
   const handleCancel = () => {
     setIsEditing(false)
     setEditedNote(null)
+    stopAddNote()
   }
 
   // attach keyboard shortcut while editing
@@ -154,7 +158,26 @@ export default function Note() {
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [isEditing, handleSave])
+  }, [isEditing, isAddingNote, handleSave])
+
+  // attach keyboard shortcut to enter edit mode
+  useEffect(() => {
+    if (isEditing || !selectedNote) return
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'e') {
+        e.preventDefault()
+        handleEditStart()
+        setTimeout(() => {
+          contentRef.current?.focus()
+        }, 0)
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, selectedNote])
 
   const handleFieldChange = (field: string, value: string) => {
     setEditedNote((prev) => ({
@@ -163,7 +186,7 @@ export default function Note() {
     }))
   }
 
-  if (!selectedNote && !isEditing) {
+  if (!selectedNote && !isEditing && !isAddingNote) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-neutral-800 px-8">
         <Button

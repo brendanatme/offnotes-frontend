@@ -25,6 +25,7 @@ export interface NotesContextType {
   ) => Promise<Note>
   updateNote: (noteId: number, note: Partial<Note>) => Promise<Note>
   startAddNote: () => void
+  stopAddNote: () => void
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined)
@@ -78,7 +79,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ['folders'] })
       return newNote
     },
-    [queryClient]
+    [queryClient, selectNote]
   )
 
   const updateNote = useCallback(
@@ -96,6 +97,10 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     setIsAddingNote(true)
   }, [])
 
+  const stopAddNote = useCallback(() => {
+    setIsAddingNote(false)
+  }, [])
+
   return (
     <NotesContext.Provider
       value={{
@@ -111,6 +116,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         createNote,
         updateNote,
         startAddNote,
+        stopAddNote,
       }}
     >
       {children}
