@@ -183,7 +183,7 @@ export default function Note() {
   if (!isEditing && selectedNote) {
     return (
       <div className="flex-1 flex flex-col bg-neutral-800 p-8 overflow-auto min-h-0">
-        <h1 className="text-4xl font-bold text-neutral-100 mb-4 text-left">
+        <h1 className="text-4xl font-bold text-neutral-100 my-4 text-left">
           {selectedNote.title}
         </h1>
         <p className="text-xl text-neutral-400 mb-8 text-left">
@@ -214,7 +214,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('title', e.currentTarget.textContent || '')
         }
-        className="text-4xl font-bold text-neutral-100 mb-4 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-blue-500 pb-2 cursor-text text-left shrink-0"
+        className="text-4xl font-bold text-neutral-100 my-4 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
       />
 
       <div
@@ -224,7 +224,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('date', e.currentTarget.textContent || '')
         }
-        className="text-xl text-neutral-400 mb-8 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-blue-500 pb-2 cursor-text text-left shrink-0"
+        className="text-xl text-neutral-400 mb-8 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
       />
 
       <div
@@ -234,7 +234,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('content', e.currentTarget.textContent || '')
         }
-        className="text-base text-neutral-300 flex-1 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-blue-500 pb-2 cursor-text whitespace-pre-wrap text-left overflow-y-auto min-h-0"
+        className="text-base text-neutral-300 flex-1 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text whitespace-pre-wrap text-left overflow-y-auto min-h-0"
       />
 
       <div className="flex justify-end gap-3 mt-8 shrink-0">

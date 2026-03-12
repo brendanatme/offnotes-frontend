@@ -49,7 +49,7 @@ export function SidebarContent<T extends HasId>({
             <button
               type="button"
               className={`cursor-pointer w-full flex justify-between items-center px-4 py-2 text-left ${
-                isSelected ? 'bg-neutral-600' : 'hover:bg-neutral-500'
+                isSelected ? 'bg-neutral-700' : 'hover:bg-neutral-600'
               }`}
               onClick={() => onSelect(item)}
             >

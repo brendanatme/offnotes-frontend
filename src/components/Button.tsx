@@ -37,7 +37,7 @@ export function Button({
         return 'text-white bg-yellow-600 hover:bg-yellow-700 transition-colors'
       case 'primary':
       default:
-        return 'text-white bg-blue-700 hover:bg-blue-600 transition-colors'
+        return 'text-white bg-gray-700 hover:bg-gray-600 transition-colors'
     }
   }
 
