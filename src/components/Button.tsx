@@ -26,9 +26,9 @@ export function Button({
     }
     switch (kind) {
       case 'invisible':
-        return 'text-white bg-transparent hover:bg-neutral-700 transition-colors'
+        return 'text-neutral-900 dark:text-white bg-transparent hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors'
       case 'secondary':
-        return 'text-white bg-neutral-700 hover:bg-neutral-600 transition-colors'
+        return 'text-neutral-900 dark:text-white bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors'
       case 'danger':
         return 'text-white bg-red-600 hover:bg-red-700 transition-colors'
       case 'success':

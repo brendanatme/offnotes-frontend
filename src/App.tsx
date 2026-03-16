@@ -5,6 +5,7 @@ import * as api from '~/api'
 import Login from '~/pages/Login'
 import Notes from '~/pages/Notes'
 import { NotesProvider } from '~/context/notes'
+import { ThemeProvider } from '~/context/theme'
 import '~/App.css'
 
 const queryClient = new QueryClient()
@@ -27,13 +28,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <NotesProvider>
-          <Routes>
-            <Route path="/" element={<InitialRouter />} />
-            <Route path="/notes" element={<Notes />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </NotesProvider>
+        <ThemeProvider>
+          <NotesProvider>
+            <Routes>
+              <Route path="/" element={<InitialRouter />} />
+              <Route path="/notes" element={<Notes />} />
+              <Route path="/login" element={<Login />} />
+            </Routes>
+          </NotesProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
   )

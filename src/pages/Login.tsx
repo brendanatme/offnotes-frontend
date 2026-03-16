@@ -27,7 +27,7 @@ function Login() {
   })
 
   return (
-    <div className="flex h-screen w-screen bg-neutral-900 text-white">
+    <div className="flex h-screen w-screen bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white">
       <div className="flex-1 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-semibold mb-6">Login</h1>
         <form
@@ -40,7 +40,7 @@ function Login() {
             placeholder="Username"
             onChange={formik.handleChange}
             value={formik.values.username}
-            className="px-3 py-2 bg-neutral-800 border border-neutral-600 rounded text-white placeholder-neutral-400 focus:outline-none focus:border-white"
+            className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white"
             required
           />
           <input
@@ -49,13 +49,13 @@ function Login() {
             placeholder="Password"
             onChange={formik.handleChange}
             value={formik.values.password}
-            className="px-3 py-2 bg-neutral-800 border border-neutral-600 rounded text-white placeholder-neutral-400 focus:outline-none focus:border-white"
+            className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white"
             required
           />
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="px-3 py-2 bg-neutral-700 border border-neutral-600 rounded hover:bg-neutral-600 transition-colors cursor-pointer disabled:opacity-50"
+            className="px-3 py-2 bg-neutral-200 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors cursor-pointer disabled:opacity-50 text-neutral-900 dark:text-white"
           >
             {mutation.isPending ? 'Signing in...' : 'Sign In'}
           </button>

@@ -188,14 +188,14 @@ export default function Note() {
 
   if (!selectedNote && !isEditing && !isAddingNote) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-neutral-800 px-8">
+      <div className="flex-1 flex flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-800 px-8">
         <Button
           onClick={handleAddNote}
           kind="secondary"
           className="w-full flex-col gap-4 px-8 py-6 rounded-lg"
         >
           <PlusIcon className="w-16 h-16 text-neutral-400" />
-          <span className="text-2xl font-semibold text-neutral-200">
+          <span className="text-2xl font-semibold text-neutral-600 dark:text-neutral-200">
             Add a Note
           </span>
         </Button>
@@ -205,11 +205,11 @@ export default function Note() {
 
   if (!isEditing && selectedNote) {
     return (
-      <div className="flex-1 flex flex-col bg-neutral-800 p-8 overflow-auto min-h-0">
-        <h1 className="text-4xl font-bold text-neutral-100 my-4 text-left">
+      <div className="flex-1 flex flex-col bg-neutral-100 dark:bg-neutral-800 p-8 overflow-auto min-h-0">
+        <h1 className="text-4xl font-bold text-neutral-900 dark:text-neutral-100 my-4 text-left">
           {selectedNote.title}
         </h1>
-        <p className="text-xl text-neutral-400 mb-8 text-left">
+        <p className="text-xl text-neutral-500 dark:text-neutral-400 mb-8 text-left">
           {new Date(selectedNote.date).toLocaleDateString('en-US', {
             weekday: 'short',
             year: 'numeric',
@@ -217,7 +217,7 @@ export default function Note() {
             day: 'numeric',
           })}
         </p>
-        <p className="text-base text-neutral-300 flex-1 whitespace-pre-wrap text-left">
+        <p className="text-base text-neutral-700 dark:text-neutral-300 flex-1 whitespace-pre-wrap text-left">
           {selectedNote.content}
         </p>
         <div className="flex justify-end gap-3 mt-8">
@@ -229,7 +229,7 @@ export default function Note() {
 
   // Editing view
   return (
-    <div className="flex-1 flex flex-col bg-neutral-800 p-8 min-h-0">
+    <div className="flex-1 flex flex-col bg-neutral-100 dark:bg-neutral-800 p-8 min-h-0">
       <div
         ref={titleRef}
         contentEditable
@@ -237,7 +237,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('title', e.currentTarget.textContent || '')
         }
-        className="text-4xl font-bold text-neutral-100 my-4 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
+        className="text-4xl font-bold text-neutral-900 dark:text-neutral-100 my-4 outline-none border-b-2 border-transparent hover:border-neutral-400 dark:hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
       />
 
       <div
@@ -247,7 +247,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('date', e.currentTarget.textContent || '')
         }
-        className="text-xl text-neutral-400 mb-8 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
+        className="text-xl text-neutral-500 dark:text-neutral-400 mb-8 outline-none border-b-2 border-transparent hover:border-neutral-400 dark:hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text text-left shrink-0"
       />
 
       <div
@@ -257,7 +257,7 @@ export default function Note() {
         onInput={(e) =>
           handleFieldChange('content', e.currentTarget.innerText || '')
         }
-        className="text-base text-neutral-300 flex-1 outline-none border-b-2 border-transparent hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text whitespace-pre-wrap text-left overflow-y-auto min-h-0"
+        className="text-base text-neutral-700 dark:text-neutral-300 flex-1 outline-none border-b-2 border-transparent hover:border-neutral-400 dark:hover:border-neutral-600 focus:border-gray-500 pb-2 cursor-text whitespace-pre-wrap text-left overflow-y-auto min-h-0"
       />
 
       <div className="flex justify-end gap-3 mt-8 shrink-0">

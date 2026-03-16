@@ -44,18 +44,20 @@ export function SidebarContent<T extends HasId>({
         return (
           <li
             key={item.id}
-            className="first:mt-0 -mt-px border-y border-neutral-500 text-sm"
+            className="first:mt-0 -mt-px border-y border-neutral-300 dark:border-neutral-500 text-sm"
           >
             <button
               type="button"
               className={`cursor-pointer w-full flex justify-between items-center px-4 py-2 text-left ${
-                isSelected ? 'bg-neutral-700' : 'hover:bg-neutral-600'
+                isSelected
+                  ? 'bg-neutral-200 dark:bg-neutral-700'
+                  : 'hover:bg-neutral-200 dark:hover:bg-neutral-600'
               }`}
               onClick={() => onSelect(item)}
             >
               <span className="truncate">{getLabel(item)}</span>
               {getSubtitle && (
-                <span className="text-neutral-400 text-xs">
+                <span className="text-neutral-500 dark:text-neutral-400 text-xs">
                   {getSubtitle(item)}
                 </span>
               )}
