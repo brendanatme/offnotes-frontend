@@ -29,8 +29,30 @@ export async function fetchFolders(): Promise<Folder[]> {
   return response.data
 }
 
-export async function fetchNotes(): Promise<Note[]> {
-  const response = await axios.get<Note[]>(`${API_BASE_URL}/api/notes/notes/`)
+export async function updateFolder(
+  folderId: number,
+  folder: Partial<Folder>
+): Promise<Folder> {
+  const response = await axios.patch<Folder>(
+    `${API_BASE_URL}/api/notes/folders/${folderId}/`,
+    folder
+  )
+  return response.data
+}
+
+export async function createFolder(folder: { name: string }): Promise<Folder> {
+  const response = await axios.post<Folder>(
+    `${API_BASE_URL}/api/notes/folders/`,
+    folder
+  )
+  return response.data
+}
+
+export async function fetchNotes(folderId?: number): Promise<Note[]> {
+  const url = folderId
+    ? `${API_BASE_URL}/api/notes/notes/?folder=${folderId}`
+    : `${API_BASE_URL}/api/notes/notes/`
+  const response = await axios.get<Note[]>(url)
   return response.data
 }
 

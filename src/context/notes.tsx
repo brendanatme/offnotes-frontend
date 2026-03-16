@@ -11,14 +11,18 @@ import {
   createNote as apiCreateNote,
   updateNote as apiUpdateNote,
   deleteNote as apiDeleteNote,
+  updateFolder as apiUpdateFolder,
+  createFolder as apiCreateFolder,
 } from '~/api'
 
 export interface NotesContextType {
   folders: Folder[]
   selectedFolder: Folder | null
+  selectedFolderId: number | null
   notes: Note[]
   selectedNote: Note | null
   isAddingNote: boolean
+  isAddingFolder: boolean
 
   setFolders: (folders: Folder[]) => void
   selectFolder: (folder: Folder | null) => void
@@ -29,8 +33,12 @@ export interface NotesContextType {
   ) => Promise<Note>
   updateNote: (noteId: number, note: Partial<Note>) => Promise<Note>
   deleteNote: (noteId: number) => Promise<void>
+  updateFolder: (folderId: number, folder: Partial<Folder>) => Promise<Folder>
+  createFolder: (name: string) => Promise<Folder>
   startAddNote: () => void
   stopAddNote: () => void
+  startAddFolder: () => void
+  stopAddFolder: () => void
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined)
@@ -47,14 +55,19 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const [notes, setNotes] = useState<Note[]>([])
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [isAddingNote, setIsAddingNote] = useState(false)
+  const [isAddingFolder, setIsAddingFolder] = useState(false)
 
   const setFolders = useCallback(
     (_folders: Folder[]) => {
-      _setFolders(_folders)
-      if (_folders.length > 0 && !selectedFolder) {
-        setSelectedFolder(_folders[0])
+      const sorted = [..._folders].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      _setFolders(sorted)
+      if (sorted.length > 0 && !selectedFolder) {
+        setSelectedFolder(sorted[0])
       } else if (selectedFolder) {
-        const updatedSelectedFolder = _folders.find(
+        const updatedSelectedFolder = sorted.find(
           (folder) => folder.id === selectedFolder.id
         )
         if (!updatedSelectedFolder) {
@@ -67,11 +80,9 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
 
   const selectFolder = useCallback((folder: Folder | null) => {
     setSelectedFolder(folder)
+    setSelectedNote(null)
     if (folder === null) {
       setNotes([])
-      setSelectedNote(null)
-    } else {
-      // setNotes
     }
   }, [])
 
@@ -86,6 +97,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
       setNotes((prev) => sortNotesByDate([...prev, newNote]))
       selectNote(newNote)
       queryClient.invalidateQueries({ queryKey: ['folders'] })
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
       return newNote
     },
     [queryClient, selectNote]
@@ -98,9 +110,10 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         sortNotesByDate(prev.map((n) => (n.id === noteId ? updatedNote : n)))
       )
       setSelectedNote(updatedNote)
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
       return updatedNote
     },
-    []
+    [queryClient]
   )
 
   const deleteNote = useCallback(
@@ -113,6 +126,21 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     [queryClient]
   )
 
+  const updateFolder = useCallback(
+    async (folderId: number, folder: Partial<Folder>) => {
+      const updatedFolder = await apiUpdateFolder(folderId, folder)
+      _setFolders((prev: Folder[]) =>
+        prev.map((f) => (f.id === folderId ? updatedFolder : f))
+      )
+      if (selectedFolder?.id === folderId) {
+        setSelectedFolder(updatedFolder)
+      }
+      queryClient.invalidateQueries({ queryKey: ['folders'] })
+      return updatedFolder
+    },
+    [queryClient, selectedFolder]
+  )
+
   const startAddNote = useCallback(() => {
     setSelectedNote(null)
     setIsAddingNote(true)
@@ -120,6 +148,25 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
 
   const stopAddNote = useCallback(() => {
     setIsAddingNote(false)
+  }, [])
+
+  const createFolder = useCallback(
+    async (name: string) => {
+      const newFolder = await apiCreateFolder({ name })
+      setFolders([...folders, newFolder])
+      setIsAddingFolder(false)
+      queryClient.invalidateQueries({ queryKey: ['folders'] })
+      return newFolder
+    },
+    [folders, queryClient, setFolders]
+  )
+
+  const startAddFolder = useCallback(() => {
+    setIsAddingFolder(true)
+  }, [])
+
+  const stopAddFolder = useCallback(() => {
+    setIsAddingFolder(false)
   }, [])
 
   const setNotesSorted = useCallback((action: React.SetStateAction<Note[]>) => {
@@ -134,7 +181,9 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
       value={{
         folders,
         isAddingNote,
+        isAddingFolder,
         selectedFolder,
+        selectedFolderId: selectedFolder?.id ?? null,
         notes,
         selectedNote,
         setFolders,
@@ -144,8 +193,12 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         createNote,
         updateNote,
         deleteNote,
+        updateFolder,
+        createFolder,
         startAddNote,
         stopAddNote,
+        startAddFolder,
+        stopAddFolder,
       }}
     >
       {children}
