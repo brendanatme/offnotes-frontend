@@ -3,6 +3,7 @@ import { useNotes } from '~/context/notes'
 import { Note as NoteInterface } from '~/interfaces'
 import { PlusIcon } from './icons/PlusIcon'
 import { Button } from './Button'
+import { ConfirmDialog } from './ConfirmDialog'
 
 export default function Note() {
   const {
@@ -11,6 +12,7 @@ export default function Note() {
     selectNote,
     createNote,
     updateNote,
+    deleteNote,
     isAddingNote,
     startAddNote,
     stopAddNote,
@@ -221,6 +223,12 @@ export default function Note() {
           {selectedNote.content}
         </p>
         <div className="flex justify-end gap-3 mt-8">
+          <ConfirmDialog
+            onAccept={() => selectedNote && deleteNote(selectedNote.id)}
+            onReject={() => {}}
+          >
+            <Button kind="danger">Delete</Button>
+          </ConfirmDialog>
           <Button onClick={handleEditStart}>Edit</Button>
         </div>
       </div>

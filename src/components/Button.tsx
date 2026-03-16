@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | 'warning'
     | 'invisible'
   size?: 'sm' | 'md' | 'lg' | 'none'
-  onClick: () => void
+  onClick?: () => void
 }
 
 export function Button({

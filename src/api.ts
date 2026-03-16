@@ -55,6 +55,10 @@ export async function updateNote(
   return response.data
 }
 
+export async function deleteNote(noteId: number): Promise<void> {
+  await axios.delete(`${API_BASE_URL}/api/notes/notes/${noteId}/`)
+}
+
 export async function logout() {
   localStorage.removeItem('authToken')
   window.location.href = '/'

@@ -7,7 +7,11 @@ import React, {
 } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Folder, Note } from '~/interfaces'
-import { createNote as apiCreateNote, updateNote as apiUpdateNote } from '~/api'
+import {
+  createNote as apiCreateNote,
+  updateNote as apiUpdateNote,
+  deleteNote as apiDeleteNote,
+} from '~/api'
 
 export interface NotesContextType {
   folders: Folder[]
@@ -24,6 +28,7 @@ export interface NotesContextType {
     note: Omit<Note, 'id' | 'created_at' | 'updated_at'>
   ) => Promise<Note>
   updateNote: (noteId: number, note: Partial<Note>) => Promise<Note>
+  deleteNote: (noteId: number) => Promise<void>
   startAddNote: () => void
   stopAddNote: () => void
 }
@@ -92,6 +97,16 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     []
   )
 
+  const deleteNote = useCallback(
+    async (noteId: number) => {
+      await apiDeleteNote(noteId)
+      setNotes((prev) => prev.filter((n) => n.id !== noteId))
+      setSelectedNote(null)
+      queryClient.invalidateQueries({ queryKey: ['folders'] })
+    },
+    [queryClient]
+  )
+
   const startAddNote = useCallback(() => {
     setSelectedNote(null)
     setIsAddingNote(true)
@@ -115,6 +130,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         selectNote,
         createNote,
         updateNote,
+        deleteNote,
         startAddNote,
         stopAddNote,
       }}
