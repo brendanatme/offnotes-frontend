@@ -104,20 +104,22 @@ export default function Note() {
     if (!editedNote) return
     setIsSaving(true)
 
+    const title = titleRef.current?.textContent || ''
+    const date = dateRef.current?.textContent || ''
+    const content = contentRef.current?.innerText || ''
+
     try {
       if (selectedNote) {
-        // Update existing note
         await updateNote(selectedNote.id, {
-          title: editedNote.title || '',
-          date: editedNote.date || '',
-          content: editedNote.content || '',
+          title,
+          date,
+          content,
         })
       } else {
-        // Create new note
         const newNote = await createNote({
-          title: editedNote.title || '',
-          date: editedNote.date || '',
-          content: editedNote.content || '',
+          title,
+          date,
+          content,
           folder: editedNote.folder || selectedFolder?.id || 1,
           user: null,
         })
@@ -212,12 +214,7 @@ export default function Note() {
           {selectedNote.title}
         </h1>
         <p className="text-xl text-neutral-500 dark:text-neutral-400 mb-8 text-left">
-          {new Date(selectedNote.date).toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
+          {selectedNote.date}
         </p>
         <p className="text-base text-neutral-700 dark:text-neutral-300 flex-1 whitespace-pre-wrap text-left">
           {selectedNote.content}

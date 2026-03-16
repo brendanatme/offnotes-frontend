@@ -35,6 +35,11 @@ export interface NotesContextType {
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined)
 
+const sortNotesByDate = (notes: Note[]): Note[] =>
+  [...notes].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
+
 export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient()
   const [folders, _setFolders] = useState<Folder[]>([])
@@ -78,9 +83,8 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const createNote = useCallback(
     async (note: Omit<Note, 'id' | 'created_at' | 'updated_at'>) => {
       const newNote = await apiCreateNote(note)
-      setNotes((prev) => [...prev, newNote])
+      setNotes((prev) => sortNotesByDate([...prev, newNote]))
       selectNote(newNote)
-      // Refetch folders to update notes_count
       queryClient.invalidateQueries({ queryKey: ['folders'] })
       return newNote
     },
@@ -90,7 +94,9 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const updateNote = useCallback(
     async (noteId: number, note: Partial<Note>) => {
       const updatedNote = await apiUpdateNote(noteId, note)
-      setNotes((prev) => prev.map((n) => (n.id === noteId ? updatedNote : n)))
+      setNotes((prev) =>
+        sortNotesByDate(prev.map((n) => (n.id === noteId ? updatedNote : n)))
+      )
       setSelectedNote(updatedNote)
       return updatedNote
     },
@@ -116,6 +122,13 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     setIsAddingNote(false)
   }, [])
 
+  const setNotesSorted = useCallback((action: React.SetStateAction<Note[]>) => {
+    setNotes((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action
+      return sortNotesByDate(next)
+    })
+  }, [])
+
   return (
     <NotesContext.Provider
       value={{
@@ -126,7 +139,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
         selectedNote,
         setFolders,
         selectFolder,
-        setNotes,
+        setNotes: setNotesSorted,
         selectNote,
         createNote,
         updateNote,
