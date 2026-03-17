@@ -48,6 +48,10 @@ export async function createFolder(folder: { name: string }): Promise<Folder> {
   return response.data
 }
 
+export async function deleteFolder(folderId: number): Promise<void> {
+  await axios.delete(`${API_BASE_URL}/api/notes/folders/${folderId}/`)
+}
+
 export async function fetchNotes(folderId?: number): Promise<Note[]> {
   const url = folderId
     ? `${API_BASE_URL}/api/notes/notes/?folder=${folderId}`

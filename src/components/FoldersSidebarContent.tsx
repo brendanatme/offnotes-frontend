@@ -11,6 +11,7 @@ export function FoldersSidebarContent() {
     setFolders,
     selectFolder,
     updateFolder,
+    deleteFolder,
     isAddingFolder,
     createFolder,
     stopAddFolder,
@@ -52,6 +53,16 @@ export function FoldersSidebarContent() {
     setEditValue('')
   }
 
+  const handleDelete = async (folderId: number) => {
+    await deleteFolder(folderId)
+  }
+
+  const sortFoldersByDate = (items: Folder[]) =>
+    [...items].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
   return (
     <SidebarContent<Folder>
       queryKey={['folders']}
@@ -67,11 +78,13 @@ export function FoldersSidebarContent() {
       inputRef={inputRef}
       onEditSubmit={handleRename}
       onEditCancel={() => setEditingId(null)}
+      onDelete={handleDelete}
       isAdding={isAddingFolder}
       onAddSubmit={handleAddFolder}
       onAddCancel={stopAddFolder}
       getLabel={(folder) => folder.name}
       getSubtitle={(folder) => `(${folder.notes_count})`}
+      sortFunction={sortFoldersByDate}
     />
   )
 }
