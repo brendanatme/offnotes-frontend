@@ -44,8 +44,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
     switch (operation.type) {
       case 'create': {
+        const folderData = operation.data as Partial<Folder>
         const serverFolder = await api.createFolder({
-          name: folder?.name || '',
+          name: folderData?.name ?? folder?.name ?? '',
         })
         await db.folders
           .where('localId')
@@ -90,12 +91,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
     switch (operation.type) {
       case 'create': {
+        const noteData = operation.data as Partial<Note>
         const serverNote = await api.createNote({
           user: null,
-          folder: note?.folder || 0,
-          title: note?.title || '',
-          date: note?.date || '',
-          content: note?.content || '',
+          folder: noteData?.folder ?? note?.folder ?? 0,
+          title: noteData?.title ?? note?.title ?? '',
+          date: noteData?.date ?? note?.date ?? '',
+          content: noteData?.content ?? note?.content ?? '',
         })
         await db.notes
           .where('localId')

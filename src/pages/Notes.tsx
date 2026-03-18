@@ -21,28 +21,22 @@ function Notes() {
           </main>
         </div>
         <header className="h-14 shrink-0 flex items-center justify-between px-6 border-t border-neutral-300 dark:border-neutral-500 bg-neutral-100 dark:bg-neutral-800">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
             <Logo />
             <SyncStatus />
           </div>
-          <nav className="flex gap-4">
-            <Link to="/login" className="hover:underline">
+          <nav className="flex gap-4 text-xs font-medium">
+            <Link to="/login" className="hover:underline uppercase">
               Login
             </Link>
             <button
-              className="cursor-pointer hover:underline"
+              className="cursor-pointer hover:underline uppercase"
               onClick={api.logout}
             >
               Logout
             </button>
-            {/* <Link to="#" className="hover:underline">
-              Import
-            </Link>
-            <Link to="#" className="hover:underline">
-              Export
-            </Link> */}
             <button
-              className="cursor-pointer hover:underline"
+              className="cursor-pointer hover:underline uppercase"
               onClick={toggleTheme}
             >
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}

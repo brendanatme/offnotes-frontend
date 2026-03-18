@@ -50,7 +50,7 @@ export function SyncStatus() {
       {pendingOperations > 0 && isOnline && !displaySyncing && (
         <button
           onClick={forceSync}
-          className="ml-2 p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
+          className="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
           title="Sync now"
         >
           <RefreshIcon className="w-4 h-4" />

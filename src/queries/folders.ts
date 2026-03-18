@@ -95,6 +95,7 @@ export function useCreateFolder() {
             type: 'create',
             entityType: 'folder',
             localId,
+            data: { name } as Record<string, unknown>,
           })
         }
       } else {
@@ -102,6 +103,7 @@ export function useCreateFolder() {
           type: 'create',
           entityType: 'folder',
           localId,
+          data: { name } as Record<string, unknown>,
         })
       }
 

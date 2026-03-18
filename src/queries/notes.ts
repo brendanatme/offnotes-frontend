@@ -115,6 +115,7 @@ export function useCreateNote() {
           type: 'create',
           entityType: 'note',
           localId,
+          data: note as unknown as Record<string, unknown>,
         })
       }
 
