@@ -1,5 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useNotes } from '~/context/notes'
+import {
+  useNotes as useNotesQuery,
+  useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
+} from '~/queries/notes'
 import { Note as NoteInterface } from '~/interfaces'
 import { PlusIcon } from './icons/PlusIcon'
 import { Button } from './Button'
@@ -7,16 +13,21 @@ import { ConfirmDialog } from './ConfirmDialog'
 
 export default function Note() {
   const {
-    selectedNote,
-    selectedFolder,
+    selectedNoteId,
+    selectedFolderId,
     selectNote,
-    createNote,
-    updateNote,
-    deleteNote,
     isAddingNote,
     startAddNote,
     stopAddNote,
   } = useNotes()
+
+  const { data: notes = [] } = useNotesQuery(selectedFolderId ?? undefined)
+  const createNote = useCreateNote()
+  const updateNote = useUpdateNote()
+  const deleteNote = useDeleteNote()
+
+  const selectedNote = notes.find((n) => n.id === selectedNoteId) ?? null
+
   const [isEditing, setIsEditing] = useState(false)
   const [editedNote, setEditedNote] = useState<Partial<NoteInterface> | null>(
     null
@@ -36,7 +47,7 @@ export default function Note() {
         title: '',
         date: formattedDate,
         content: '',
-        folder: selectedFolder?.id || 1,
+        folder: selectedFolderId || 1,
       })
       setIsEditing(true)
     } else {
@@ -45,13 +56,11 @@ export default function Note() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAddingNote])
 
-  // Reset to view state when selected note changes
   useEffect(() => {
     setIsEditing(false)
     setEditedNote(null)
-  }, [selectedNote?.id])
+  }, [selectedNoteId])
 
-  // Set contentEditable text content when editing state changes
   useEffect(() => {
     if (isEditing && editedNote) {
       if (titleRef.current) {
@@ -64,7 +73,6 @@ export default function Note() {
         contentRef.current.innerText = editedNote.content || ''
       }
 
-      // Focus title when creating a new note
       if (!selectedNote && titleRef.current) {
         titleRef.current.focus()
       }
@@ -88,7 +96,7 @@ export default function Note() {
       title: '',
       date: formattedDate,
       content: '',
-      folder: selectedFolder?.id || 1,
+      folder: selectedFolderId || 1,
     })
     startAddNote()
   }
@@ -110,20 +118,19 @@ export default function Note() {
 
     try {
       if (selectedNote) {
-        await updateNote(selectedNote.id, {
-          title,
-          date,
-          content,
+        await updateNote.mutateAsync({
+          noteId: selectedNote.id,
+          note: { title, date, content },
         })
       } else {
-        const newNote = await createNote({
+        const newNote = await createNote.mutateAsync({
           title,
           date,
           content,
-          folder: editedNote.folder || selectedFolder?.id || 1,
+          folder: editedNote.folder || selectedFolderId || 1,
           user: null,
         })
-        selectNote(newNote)
+        selectNote(newNote.id)
         stopAddNote()
       }
       setIsEditing(false)
@@ -139,7 +146,7 @@ export default function Note() {
     updateNote,
     createNote,
     selectNote,
-    selectedFolder,
+    selectedFolderId,
     stopAddNote,
   ])
 
@@ -149,7 +156,6 @@ export default function Note() {
     stopAddNote()
   }
 
-  // attach keyboard shortcut while editing
   useEffect(() => {
     if (!isEditing) return
 
@@ -162,9 +168,8 @@ export default function Note() {
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [isEditing, isAddingNote, handleSave])
+  }, [isEditing, handleSave])
 
-  // attach keyboard shortcut to enter edit mode
   useEffect(() => {
     if (isEditing || !selectedNote) return
 
@@ -188,6 +193,13 @@ export default function Note() {
       ...prev,
       [field]: value,
     }))
+  }
+
+  const handleDelete = async () => {
+    if (selectedNote) {
+      await deleteNote.mutateAsync(selectedNote.id)
+      selectNote(null)
+    }
   }
 
   if (!selectedNote && !isEditing && !isAddingNote) {
@@ -220,10 +232,7 @@ export default function Note() {
           {selectedNote.content}
         </p>
         <div className="flex justify-end gap-3 mt-8">
-          <ConfirmDialog
-            onAccept={() => selectedNote && deleteNote(selectedNote.id)}
-            onReject={() => {}}
-          >
+          <ConfirmDialog onAccept={handleDelete} onReject={() => {}}>
             <Button kind="danger">Delete</Button>
           </ConfirmDialog>
           <Button onClick={handleEditStart}>Edit</Button>
@@ -232,7 +241,6 @@ export default function Note() {
     )
   }
 
-  // Editing view
   return (
     <div className="flex-1 flex flex-col bg-neutral-100 dark:bg-neutral-800 p-8 min-h-0">
       <div

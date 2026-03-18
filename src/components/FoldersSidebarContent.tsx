@@ -1,24 +1,28 @@
-import * as api from '~/api'
 import { Folder } from '~/interfaces'
 import { useNotes } from '~/context/notes'
+import {
+  useFolders,
+  useCreateFolder,
+  useUpdateFolder,
+  useDeleteFolder,
+} from '~/queries/folders'
 import { SidebarContent } from './SidebarContent'
 import { useState, useRef, useEffect } from 'react'
 
 export function FoldersSidebarContent() {
-  const {
-    folders,
-    selectedFolder,
-    setFolders,
-    selectFolder,
-    updateFolder,
-    deleteFolder,
-    isAddingFolder,
-    createFolder,
-    stopAddFolder,
-  } = useNotes()
+  const { selectedFolderId, selectFolder, isAddingFolder, stopAddFolder } =
+    useNotes()
+
+  const { data: folders = [] } = useFolders()
+  const createFolder = useCreateFolder()
+  const updateFolder = useUpdateFolder()
+  const deleteFolder = useDeleteFolder()
+
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const selectedFolder = folders.find((f) => f.id === selectedFolderId) ?? null
 
   useEffect(() => {
     if (editingId !== null && inputRef.current) {
@@ -39,14 +43,17 @@ export function FoldersSidebarContent() {
 
   const handleRename = async (folderId: number) => {
     if (editValue.trim()) {
-      await updateFolder(folderId, { name: editValue.trim() })
+      await updateFolder.mutateAsync({
+        folderId,
+        folder: { name: editValue.trim() },
+      })
     }
     setEditingId(null)
   }
 
   const handleAddFolder = async () => {
     if (editValue.trim()) {
-      await createFolder(editValue.trim())
+      await createFolder.mutateAsync(editValue.trim())
     } else {
       stopAddFolder()
     }
@@ -54,7 +61,7 @@ export function FoldersSidebarContent() {
   }
 
   const handleDelete = async (folderId: number) => {
-    await deleteFolder(folderId)
+    await deleteFolder.mutateAsync(folderId)
   }
 
   const sortFoldersByDate = (items: Folder[]) =>
@@ -65,12 +72,9 @@ export function FoldersSidebarContent() {
 
   return (
     <SidebarContent<Folder>
-      queryKey={['folders']}
-      queryFn={api.fetchFolders}
-      items={folders}
+      items={sortFoldersByDate(folders)}
       selectedItem={selectedFolder}
-      setItems={setFolders}
-      onSelect={selectFolder}
+      onSelect={(folder) => selectFolder(folder.id)}
       onDoubleClick={handleDoubleClick}
       isEditing={editingId}
       editValue={editValue}
@@ -84,7 +88,6 @@ export function FoldersSidebarContent() {
       onAddCancel={stopAddFolder}
       getLabel={(folder) => folder.name}
       getSubtitle={(folder) => `(${folder.notes_count})`}
-      sortFunction={sortFoldersByDate}
     />
   )
 }

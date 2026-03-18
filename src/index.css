@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-red-500: oklch(0.55 0.2 27);
+  --color-red-600: oklch(0.52 0.15 27);
+  --color-red-700: oklch(0.45 0.15 27);
+  --color-red-800: oklch(0.38 0.1 27);
+  --color-red-900: oklch(0.32 0.08 27);
+}
+
 * {
   box-sizing: border-box;
 }

@@ -1,5 +1,4 @@
-import { ReactNode, useEffect, RefObject, useRef, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { ReactNode, RefObject, useRef, useState } from 'react'
 import { ConfirmDialog } from './ConfirmDialog'
 import { useClickOutside } from '~/hooks/useClickOutside'
 
@@ -8,11 +7,8 @@ interface HasId {
 }
 
 interface SidebarContentProps<T extends HasId> {
-  queryKey?: string[]
-  queryFn?: () => Promise<T[]>
   items: T[]
   selectedItem: T | null
-  setItems: (items: T[]) => void
   onSelect: (item: T) => void
   onDoubleClick?: (item: T) => void
   isEditing?: number | null
@@ -27,15 +23,11 @@ interface SidebarContentProps<T extends HasId> {
   onAddCancel?: () => void
   getLabel: (item: T) => string
   getSubtitle?: (item: T) => ReactNode
-  sortFunction?: (items: T[]) => T[]
 }
 
 export function SidebarContent<T extends HasId>({
-  queryKey,
-  queryFn,
-  items: initialItems,
+  items,
   selectedItem,
-  setItems,
   onSelect,
   onDoubleClick,
   isEditing,
@@ -50,23 +42,7 @@ export function SidebarContent<T extends HasId>({
   onAddCancel,
   getLabel,
   getSubtitle,
-  sortFunction,
 }: SidebarContentProps<T>) {
-  const shouldFetch = Boolean(queryKey && queryFn)
-  const { data } = useSuspenseQuery<T[]>({
-    queryKey: queryKey ?? [],
-    queryFn: queryFn ?? (async () => []),
-  })
-
-  const items = shouldFetch && data ? data : initialItems
-  const sortedItems = sortFunction ? sortFunction(items) : items
-
-  useEffect(() => {
-    if (shouldFetch && data && !sortFunction) {
-      setItems(data)
-    }
-  }, [data, setItems, shouldFetch, sortFunction])
-
   const editingItemRef = useRef<HTMLDivElement>(null)
   useClickOutside(editingItemRef, () => {
     if (isEditing != null && !isDeleting) {
@@ -100,7 +76,7 @@ export function SidebarContent<T extends HasId>({
           </div>
         </li>
       )}
-      {sortedItems.map((item: T) => {
+      {items.map((item: T) => {
         const isSelected = selectedItem?.id === item.id
         const isItemEditing = isEditing === item.id
         return (

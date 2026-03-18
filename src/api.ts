@@ -53,9 +53,10 @@ export async function deleteFolder(folderId: number): Promise<void> {
 }
 
 export async function fetchNotes(folderId?: number): Promise<Note[]> {
-  const url = folderId
-    ? `${API_BASE_URL}/api/notes/notes/?folder=${folderId}`
-    : `${API_BASE_URL}/api/notes/notes/`
+  if (folderId === undefined) {
+    return []
+  }
+  const url = `${API_BASE_URL}/api/notes/notes/?folder=${folderId}`
   const response = await axios.get<Note[]>(url)
   return response.data
 }
