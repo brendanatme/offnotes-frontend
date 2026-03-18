@@ -4,6 +4,8 @@ import { FoldersSidebar } from '~/components/FoldersSidebar'
 import { NotesSidebar } from '~/components/NotesSidebar'
 import Note from '~/components/Note'
 import { useTheme } from '~/context/theme'
+import { SyncStatus } from '~/components/SyncStatus'
+import { Logo } from '~/components/Logo'
 
 function Notes() {
   const { theme, toggleTheme } = useTheme()
@@ -19,7 +21,10 @@ function Notes() {
           </main>
         </div>
         <header className="h-14 shrink-0 flex items-center justify-between px-6 border-t border-neutral-300 dark:border-neutral-500 bg-neutral-100 dark:bg-neutral-800">
-          <h1 className="text-lg font-semibold">&Oslash;ffNotes</h1>
+          <div className="flex items-center gap-6">
+            <Logo />
+            <SyncStatus />
+          </div>
           <nav className="flex gap-4">
             <Link to="/login" className="hover:underline">
               Login

@@ -55,7 +55,7 @@ export function SidebarContent<T extends HasId>({
   return (
     <ul className="">
       {isAdding && (
-        <li className="first:mt-0 -mt-px border-y border-neutral-300 dark:border-neutral-500 text-sm">
+        <li className="first:mt-0 -mt-px border-b border-neutral-300 dark:border-neutral-500 text-sm">
           <div className="flex justify-between items-center px-4 py-2">
             <input
               ref={inputRef}
@@ -82,7 +82,7 @@ export function SidebarContent<T extends HasId>({
         return (
           <li
             key={item.id}
-            className="first:mt-0 -mt-px border-y border-neutral-300 dark:border-neutral-500 text-sm flex"
+            className="first:mt-0 -mt-px border-b border-neutral-300 dark:border-neutral-500 text-sm flex"
           >
             {isItemEditing ? (
               <div

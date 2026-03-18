@@ -22,8 +22,8 @@ export function Sidebar({
   const [open, setOpen] = useState(true)
 
   const headerClass = open
-    ? 'h-12 flex items-center justify-between gap-2 px-4 py-2'
-    : 'h-12 flex items-center justify-center p-2'
+    ? 'h-12 flex items-center border-b border-neutral-300 dark:border-neutral-500 justify-between gap-2 px-4 py-2'
+    : 'h-12 flex items-center border-b border-neutral-300 dark:border-neutral-500 justify-center p-2'
 
   return (
     <aside
