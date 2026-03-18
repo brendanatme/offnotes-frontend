@@ -20,36 +20,39 @@ export function useFolders() {
   return useQuery({
     queryKey: folderKeys.all,
     queryFn: async () => {
+      const localFolders = await db.folders.toArray()
+
       if (!isOnline) {
-        const localFolders = await db.folders.toArray()
         return localFolders
       }
 
-      const serverFolders = await fetchFolders()
-      const localFolders = await db.folders.toArray()
+      try {
+        const serverFolders = await fetchFolders()
+        const localOnly = localFolders.filter(
+          (lf) => lf.syncStatus === 'pending' && lf.serverId === undefined
+        )
 
-      const localOnly = localFolders.filter(
-        (lf) => lf.syncStatus === 'pending' && lf.serverId === undefined
-      )
-
-      const merged = [...serverFolders]
-      for (const local of localOnly) {
-        const serverIdx = merged.findIndex((sf) => sf.id === local.id)
-        if (serverIdx === -1) {
-          merged.push(local)
+        const merged = [...serverFolders]
+        for (const local of localOnly) {
+          const serverIdx = merged.findIndex((sf) => sf.id === local.id)
+          if (serverIdx === -1) {
+            merged.push(local)
+          }
         }
-      }
 
-      await db.folders.clear()
-      for (const folder of merged) {
-        await db.folders.put({
-          ...folder,
-          syncStatus: 'synced',
-          serverId: folder.id,
-        } as SyncableFolder)
-      }
+        await db.folders.clear()
+        for (const folder of merged) {
+          await db.folders.put({
+            ...folder,
+            syncStatus: 'synced',
+            serverId: folder.id,
+          } as SyncableFolder)
+        }
 
-      return db.folders.toArray()
+        return db.folders.toArray()
+      } catch {
+        return localFolders
+      }
     },
     staleTime: 1000 * 60 * 5,
   })
@@ -199,22 +202,16 @@ export function useDeleteFolder() {
 
   return useMutation({
     mutationFn: async (folderId: number) => {
-      const localId = (await db.folders.where('id').equals(folderId).first())
-        ?.localId
+      const localFolder = await db.folders.where('id').equals(folderId).first()
+      const localId = localFolder?.localId
+      const serverId = localFolder?.serverId
 
       await db.notes.where('folder').equals(folderId).delete()
-
       await db.folders.where('id').equals(folderId).delete()
 
-      if (isOnline && localId) {
+      if (isOnline && serverId) {
         try {
-          const serverFolder = await db.folders
-            .where('localId')
-            .equals(localId)
-            .first()
-          if (serverFolder?.serverId) {
-            await apiDeleteFolder(serverFolder.serverId)
-          }
+          await apiDeleteFolder(serverId)
         } catch {
           if (localId) {
             await addToSyncQueue({

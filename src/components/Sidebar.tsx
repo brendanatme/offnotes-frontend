@@ -22,8 +22,8 @@ export function Sidebar({
   const [open, setOpen] = useState(true)
 
   const headerClass = open
-    ? 'h-12 flex items-center border-b border-neutral-300 dark:border-neutral-500 justify-between gap-2 px-4 py-2'
-    : 'h-12 flex items-center border-b border-neutral-300 dark:border-neutral-500 justify-center p-2'
+    ? 'h-12 flex items-center justify-between gap-2 px-4 py-2'
+    : 'h-12 flex items-center justify-center p-2'
 
   return (
     <aside
@@ -51,8 +51,8 @@ export function Sidebar({
       <div
         className={`flex-1 ${
           open
-            ? 'overflow-auto opacity-100 transition-opacity duration-200 delay-200'
-            : 'overflow-hidden opacity-0 transition-none pointer-events-none'
+            ? 'border-t border-neutral-300 dark:border-neutral-500 overflow-auto opacity-100 transition-opacity duration-200 delay-200'
+            : 'border-t border-neutral-300 dark:border-neutral-500 overflow-hidden opacity-0 transition-none pointer-events-none'
         }`}
       >
         <ErrorBoundary

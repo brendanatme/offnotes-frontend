@@ -82,7 +82,7 @@ export function SidebarContent<T extends HasId>({
         return (
           <li
             key={item.id}
-            className="first:mt-0 -mt-px border-b border-neutral-300 dark:border-neutral-500 text-sm flex"
+            className="border-b border-neutral-300 dark:border-neutral-500 text-sm flex"
           >
             {isItemEditing ? (
               <div

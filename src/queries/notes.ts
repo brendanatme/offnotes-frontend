@@ -23,48 +23,48 @@ export function useNotes(folderId?: number) {
     queryFn: async () => {
       if (folderId === undefined) return []
 
-      if (!isOnline) {
-        const localNotes = await db.notes
-          .where('folder')
-          .equals(folderId)
-          .toArray()
-        return localNotes
-      }
-
-      const serverNotes = await fetchNotes(folderId)
       const localNotes = await db.notes
         .where('folder')
         .equals(folderId)
         .toArray()
 
-      const localOnly = localNotes.filter(
-        (ln) => ln.syncStatus === 'pending' && ln.serverId === undefined
-      )
+      if (!isOnline) {
+        return localNotes
+      }
 
-      const merged: SyncableNote[] = [
-        ...serverNotes.map((s) => ({
-          ...s,
-          syncStatus: 'synced' as const,
-          serverId: s.id,
-        })),
-      ]
-      for (const local of localOnly) {
-        const serverIdx = merged.findIndex((sn) => sn.id === local.id)
-        if (serverIdx === -1) {
-          merged.push(local)
+      try {
+        const serverNotes = await fetchNotes(folderId)
+        const localOnly = localNotes.filter(
+          (ln) => ln.syncStatus === 'pending' && ln.serverId === undefined
+        )
+
+        const merged: SyncableNote[] = [
+          ...serverNotes.map((s) => ({
+            ...s,
+            syncStatus: 'synced' as const,
+            serverId: s.id,
+          })),
+        ]
+        for (const local of localOnly) {
+          const serverIdx = merged.findIndex((sn) => sn.id === local.id)
+          if (serverIdx === -1) {
+            merged.push(local)
+          }
         }
-      }
 
-      await db.notes.where('folder').equals(folderId).delete()
-      for (const note of merged) {
-        await db.notes.put({
-          ...note,
-          syncStatus: 'synced',
-          serverId: note.serverId || note.id,
-        } as SyncableNote)
-      }
+        await db.notes.where('folder').equals(folderId).delete()
+        for (const note of merged) {
+          await db.notes.put({
+            ...note,
+            syncStatus: 'synced',
+            serverId: note.serverId || note.id,
+          } as SyncableNote)
+        }
 
-      return db.notes.where('folder').equals(folderId).toArray()
+        return db.notes.where('folder').equals(folderId).toArray()
+      } catch {
+        return localNotes
+      }
     },
     enabled: folderId !== undefined,
     staleTime: 1000 * 60 * 5,
@@ -93,7 +93,6 @@ export function useCreateNote() {
       }
 
       await db.notes.add(localNote)
-      queryClient.invalidateQueries({ queryKey: noteKeys.all })
 
       if (isOnline) {
         try {
@@ -108,6 +107,7 @@ export function useCreateNote() {
             type: 'create',
             entityType: 'note',
             localId,
+            data: note as unknown as Record<string, unknown>,
           })
         }
       } else {
@@ -230,20 +230,13 @@ export function useDeleteNote() {
     mutationFn: async (noteId: number) => {
       const localNote = await db.notes.where('id').equals(noteId).first()
       const localId = localNote?.localId
+      const serverId = localNote?.serverId
 
       await db.notes.where('id').equals(noteId).delete()
 
-      queryClient.invalidateQueries({ queryKey: noteKeys.all })
-
-      if (isOnline && localId) {
+      if (isOnline && serverId) {
         try {
-          const serverNote = await db.notes
-            .where('localId')
-            .equals(localId)
-            .first()
-          if (serverNote?.serverId) {
-            await apiDeleteNote(serverNote.serverId)
-          }
+          await apiDeleteNote(serverId)
         } catch {
           if (localId) {
             await addToSyncQueue({

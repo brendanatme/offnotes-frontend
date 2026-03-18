@@ -1,0 +1,23 @@
+{
+  "name": "OffNotes",
+  "short_name": "OffNotes",
+  "description": "A note-taking app with offline-first support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "/favicon-green.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-amber.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
