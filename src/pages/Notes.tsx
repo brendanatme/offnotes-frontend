@@ -13,10 +13,10 @@ function Notes() {
   return (
     <>
       <div className="flex flex-col h-screen w-screen bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-200">
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden max-md:flex-col">
           <FoldersSidebar />
           <NotesSidebar />
-          <main className="flex-1 flex min-h-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+          <main className="flex-1 flex min-h-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800 max-md:min-h-0">
             <Note />
           </main>
         </div>

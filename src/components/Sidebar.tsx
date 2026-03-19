@@ -27,8 +27,8 @@ export function Sidebar({
 
   return (
     <aside
-      className={`shrink-0 flex flex-col border-r border-neutral-300 dark:border-neutral-500 transition-all duration-200 bg-neutral-100 dark:bg-neutral-800 ${
-        open ? 'w-50' : 'w-12'
+      className={`shrink-0 flex flex-col transition-all duration-200 bg-neutral-100 dark:bg-neutral-800 max-md:w-full max-md:border-b max-md:border-neutral-300 max-md:dark:border-neutral-500 max-md:border-r-0 border-r border-neutral-300 dark:border-neutral-500 ${
+        open ? 'w-50 max-md:h-40' : 'w-12 max-md:w-full max-md:h-12'
       }`}
     >
       <div className={headerClass}>
