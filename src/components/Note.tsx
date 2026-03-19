@@ -6,6 +6,7 @@ import {
   useUpdateNote,
   useDeleteNote,
 } from '~/queries/notes'
+import { db } from '~/db'
 import { Note as NoteInterface } from '~/interfaces'
 import { PlusIcon } from './icons/PlusIcon'
 import { Button } from './Button'
@@ -130,7 +131,13 @@ export default function Note() {
           folder: editedNote.folder || selectedFolderId || 1,
           user: null,
         })
-        selectNote(newNote.id)
+        const createdNote = await db.notes
+          .where('localId')
+          .equals(newNote.localId!)
+          .first()
+        if (createdNote) {
+          selectNote(createdNote.id)
+        }
       }
       setIsEditing(false)
       setEditedNote(null)
