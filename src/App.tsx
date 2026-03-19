@@ -10,7 +10,12 @@ import { SyncProvider } from '~/sync'
 import { initializeDatabase } from '~/db'
 import '~/App.css'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { networkMode: 'always' },
+    mutations: { networkMode: 'always' },
+  },
+})
 
 function InitialRouter() {
   const navigate = useNavigate()

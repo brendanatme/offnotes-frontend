@@ -246,6 +246,12 @@ export function useDeleteNote() {
             })
           }
         }
+      } else if (!isOnline && serverId) {
+        await addToSyncQueue({
+          type: 'delete',
+          entityType: 'note',
+          serverId,
+        })
       } else if (localId) {
         await addToSyncQueue({
           type: 'delete',

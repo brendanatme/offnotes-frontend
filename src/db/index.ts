@@ -21,7 +21,8 @@ export interface SyncOperation {
   id?: number
   type: OperationType
   entityType: 'folder' | 'note'
-  localId: string
+  localId?: string
+  serverId?: number
   data?: Record<string, unknown>
   timestamp: number
   retryCount: number

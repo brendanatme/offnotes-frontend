@@ -131,7 +131,6 @@ export default function Note() {
           user: null,
         })
         selectNote(newNote.id)
-        stopAddNote()
       }
       setIsEditing(false)
       setEditedNote(null)
@@ -147,7 +146,6 @@ export default function Note() {
     createNote,
     selectNote,
     selectedFolderId,
-    stopAddNote,
   ])
 
   const handleCancel = () => {
