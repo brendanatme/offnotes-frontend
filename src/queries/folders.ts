@@ -32,11 +32,17 @@ export function useFolders() {
           (lf) => lf.syncStatus === 'pending' && lf.serverId === undefined
         )
 
-        const merged = [...serverFolders]
+        const merged: SyncableFolder[] = serverFolders.map((f) => ({
+          ...f,
+          syncStatus: 'synced' as const,
+          serverId: f.id,
+        }))
         for (const local of localOnly) {
-          const serverIdx = merged.findIndex((sf) => sf.id === local.id)
+          const serverIdx = merged.findIndex((sf) => sf.id === local.serverId)
           if (serverIdx === -1) {
             merged.push(local)
+          } else {
+            merged[serverIdx] = { ...local, syncStatus: 'pending' }
           }
         }
 
@@ -130,8 +136,9 @@ export function useUpdateFolder() {
       folderId: number
       folder: Partial<Folder>
     }) => {
-      const localId = (await db.folders.where('id').equals(folderId).first())
-        ?.localId
+      const localFolder = await db.folders.where('id').equals(folderId).first()
+      const localId = localFolder?.localId
+      const serverId = localFolder?.serverId
 
       await db.folders
         .where('id')
@@ -164,11 +171,34 @@ export function useUpdateFolder() {
             })
           }
         }
+      } else if (isOnline && serverId) {
+        try {
+          await apiUpdateFolder(serverId, folder)
+          await db.folders.where('id').equals(folderId).modify({
+            syncStatus: 'synced',
+          })
+        } catch {
+          if (serverId) {
+            await addToSyncQueue({
+              type: 'update',
+              entityType: 'folder',
+              serverId,
+              data: folder as Record<string, unknown>,
+            })
+          }
+        }
       } else if (localId) {
         await addToSyncQueue({
           type: 'update',
           entityType: 'folder',
           localId,
+          data: folder as Record<string, unknown>,
+        })
+      } else if (serverId) {
+        await addToSyncQueue({
+          type: 'update',
+          entityType: 'folder',
+          serverId,
           data: folder as Record<string, unknown>,
         })
       }

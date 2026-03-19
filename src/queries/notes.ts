@@ -34,7 +34,10 @@ export function useNotes(folderId?: number) {
 
       try {
         const serverNotes = await fetchNotes(folderId)
-        const localOnly = localNotes.filter(
+        const localPendingEdits = localNotes.filter(
+          (ln) => ln.syncStatus === 'pending' && ln.serverId !== undefined
+        )
+        const localOnlyCreates = localNotes.filter(
           (ln) => ln.syncStatus === 'pending' && ln.serverId === undefined
         )
 
@@ -45,10 +48,22 @@ export function useNotes(folderId?: number) {
             serverId: s.id,
           })),
         ]
-        for (const local of localOnly) {
-          const serverIdx = merged.findIndex((sn) => sn.id === local.id)
+        for (const local of localPendingEdits) {
+          const serverIdx = merged.findIndex(
+            (sn) => sn.serverId === local.serverId
+          )
+          if (serverIdx !== -1) {
+            merged[serverIdx] = { ...local, syncStatus: 'pending' }
+          }
+        }
+        for (const local of localOnlyCreates) {
+          const serverIdx = merged.findIndex(
+            (sn) => sn.serverId === local.serverId
+          )
           if (serverIdx === -1) {
             merged.push(local)
+          } else {
+            merged[serverIdx] = { ...local, syncStatus: 'pending' }
           }
         }
 
@@ -142,6 +157,7 @@ export function useUpdateNote() {
     }) => {
       const localNote = await db.notes.where('id').equals(noteId).first()
       const localId = localNote?.localId
+      const serverId = localNote?.serverId
 
       await db.notes
         .where('id')
@@ -176,11 +192,34 @@ export function useUpdateNote() {
             })
           }
         }
+      } else if (isOnline && serverId) {
+        try {
+          await apiUpdateNote(serverId, note)
+          await db.notes.where('id').equals(noteId).modify({
+            syncStatus: 'synced',
+          })
+        } catch {
+          if (serverId) {
+            await addToSyncQueue({
+              type: 'update',
+              entityType: 'note',
+              serverId,
+              data: note as Record<string, unknown>,
+            })
+          }
+        }
       } else if (localId) {
         await addToSyncQueue({
           type: 'update',
           entityType: 'note',
           localId,
+          data: note as Record<string, unknown>,
+        })
+      } else if (serverId) {
+        await addToSyncQueue({
+          type: 'update',
+          entityType: 'note',
+          serverId,
           data: note as Record<string, unknown>,
         })
       }
