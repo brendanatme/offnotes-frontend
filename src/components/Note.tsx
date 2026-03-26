@@ -213,7 +213,7 @@ export default function Note() {
         <Button
           onClick={handleAddNote}
           kind="secondary"
-          className="w-full flex-col gap-4 px-8 py-6 rounded-lg"
+          className="w-full flex-col gap-4 px-8 py-6 rounded-lg max-w-150"
         >
           <PlusIcon className="w-16 h-16 text-neutral-400" />
           <span className="text-2xl font-semibold text-neutral-600 dark:text-neutral-200">
