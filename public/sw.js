@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offnotes-v1'
+const CACHE_NAME = 'offnotes-v2'
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -39,7 +39,10 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request)
         .then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+          if (!response || response.status !== 200) {
+            return response
+          }
+          if (response.type === 'opaque') {
             return response
           }
 
