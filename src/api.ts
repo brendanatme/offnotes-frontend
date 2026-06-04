@@ -76,6 +76,13 @@ export async function deleteFolder(folderId: number): Promise<void> {
   await axios.delete(`${API_BASE_URL}/api/notes/folders/${folderId}/`)
 }
 
+export async function fetchNote(noteId: number): Promise<Note> {
+  const response = await axios.get<Note>(
+    `${API_BASE_URL}/api/notes/notes/${noteId}/`
+  )
+  return response.data
+}
+
 export async function fetchNotes(folderId?: number): Promise<Note[]> {
   if (folderId === undefined) {
     return []
@@ -86,7 +93,7 @@ export async function fetchNotes(folderId?: number): Promise<Note[]> {
 }
 
 export async function createNote(
-  note: Omit<Note, 'id' | 'created_at' | 'updated_at'>
+  note: Omit<Note, 'id' | 'created_at' | 'updated_at' | 'latest_commit'>
 ): Promise<Note> {
   const response = await axios.post<Note>(
     `${API_BASE_URL}/api/notes/notes/`,

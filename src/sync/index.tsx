@@ -7,9 +7,16 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import { db, type SyncOperation, type SyncStatus } from '~/db'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  db,
+  type SyncOperation,
+  type SyncStatus,
+  type SyncableNote,
+} from '~/db'
 import * as api from '~/api'
 import type { Folder, Note } from '~/interfaces'
+import { ConflictModal, type ConflictState } from '~/components/ConflictModal'
 
 export interface SyncState {
   isOnline: boolean
@@ -30,11 +37,13 @@ const SyncContext = createContext<SyncContextType | undefined>(undefined)
 const MAX_RETRY_COUNT = 3
 
 export function SyncProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient()
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [pendingOperations, setPendingOperations] = useState(0)
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null)
   const isSyncingRef = useRef(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [conflict, setConflict] = useState<ConflictState | null>(null)
 
   const processFolderOp = useCallback(async (operation: SyncOperation) => {
     let folder = operation.localId
@@ -92,62 +101,110 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const processNoteOp = useCallback(async (operation: SyncOperation) => {
-    let note = operation.localId
-      ? await db.notes.where('localId').equals(operation.localId).first()
-      : operation.serverId
-        ? await db.notes.where('serverId').equals(operation.serverId).first()
-        : null
+  const processNoteOp = useCallback(
+    async (operation: SyncOperation) => {
+      let note = operation.localId
+        ? await db.notes.where('localId').equals(operation.localId).first()
+        : operation.serverId
+          ? await db.notes.where('serverId').equals(operation.serverId).first()
+          : null
 
-    switch (operation.type) {
-      case 'create': {
-        const noteData = operation.data as Partial<Note>
-        const serverNote = await api.createNote({
-          user: api.getUserId(),
-          folder: noteData?.folder ?? note?.folder ?? 0,
-          title: noteData?.title ?? note?.title ?? '',
-          date: noteData?.date ?? note?.date ?? '',
-          content: noteData?.content ?? note?.content ?? '',
-        })
-        if (operation.localId) {
-          await db.notes
-            .where('localId')
-            .equals(operation.localId)
-            .modify({
-              id: serverNote.id,
-              syncStatus: 'synced' as SyncStatus,
-              serverId: serverNote.id,
-            })
-        }
-        break
-      }
-      case 'update': {
-        if (note?.serverId) {
-          await api.updateNote(note.serverId, operation.data as Partial<Note>)
+      switch (operation.type) {
+        case 'create': {
+          const noteData = operation.data as Partial<Note>
+          const serverNote = await api.createNote({
+            user: api.getUserId(),
+            folder: noteData?.folder ?? note?.folder ?? 0,
+            title: noteData?.title ?? note?.title ?? '',
+            date: noteData?.date ?? note?.date ?? '',
+            content: noteData?.content ?? note?.content ?? '',
+          })
           if (operation.localId) {
             await db.notes
               .where('localId')
               .equals(operation.localId)
               .modify({
+                id: serverNote.id,
                 syncStatus: 'synced' as SyncStatus,
+                serverId: serverNote.id,
               })
           }
+          break
         }
-        break
+        case 'update': {
+          if (note?.serverId) {
+            const { latest_commit: queuedCommit, ...updatePayload } =
+              (operation.data ?? {}) as Partial<Note> & {
+                latest_commit?: number
+              }
+
+            if (queuedCommit !== undefined) {
+              const serverNote = await api.fetchNote(note.serverId)
+
+              if (serverNote.latest_commit !== queuedCommit) {
+                const choice = await new Promise<'local' | 'server'>(
+                  (resolve) => {
+                    setConflict({ localNote: note, serverNote, resolve })
+                  }
+                )
+                setConflict(null)
+
+                if (choice === 'local') {
+                  await api.updateNote(note.serverId, updatePayload)
+                  if (operation.localId) {
+                    await db.notes
+                      .where('localId')
+                      .equals(operation.localId)
+                      .modify({ syncStatus: 'synced' as SyncStatus })
+                  }
+                } else {
+                  const syncedFields: Partial<SyncableNote> = {
+                    ...serverNote,
+                    syncStatus: 'synced',
+                    serverId: serverNote.id,
+                  }
+                  if (operation.localId) {
+                    await db.notes
+                      .where('localId')
+                      .equals(operation.localId)
+                      .modify(syncedFields)
+                  } else {
+                    await db.notes
+                      .where('id')
+                      .equals(note.id)
+                      .modify(syncedFields)
+                  }
+                  queryClient.invalidateQueries({ queryKey: ['notes'] })
+                }
+                break
+              }
+            }
+
+            await api.updateNote(note.serverId, updatePayload)
+            if (operation.localId) {
+              await db.notes
+                .where('localId')
+                .equals(operation.localId)
+                .modify({ syncStatus: 'synced' as SyncStatus })
+            }
+          }
+          break
+        }
+        case 'delete': {
+          if (operation.serverId) {
+            await api.deleteNote(operation.serverId)
+          }
+          if (operation.localId) {
+            await db.notes.where('localId').equals(operation.localId).delete()
+          } else if (operation.serverId) {
+            await db.notes.where('serverId').equals(operation.serverId).delete()
+          }
+          break
+        }
       }
-      case 'delete': {
-        if (operation.serverId) {
-          await api.deleteNote(operation.serverId)
-        }
-        if (operation.localId) {
-          await db.notes.where('localId').equals(operation.localId).delete()
-        } else if (operation.serverId) {
-          await db.notes.where('serverId').equals(operation.serverId).delete()
-        }
-        break
-      }
-    }
-  }, [])
+    },
+    [queryClient]
+  )
 
   const processOperation = useCallback(
     async (operation: SyncOperation) => {
@@ -263,6 +320,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      {conflict && <ConflictModal conflict={conflict} />}
     </SyncContext.Provider>
   )
 }

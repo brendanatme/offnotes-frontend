@@ -24,4 +24,5 @@ export interface Note {
   content: string
   created_at: string
   updated_at: string
+  latest_commit: number
 }

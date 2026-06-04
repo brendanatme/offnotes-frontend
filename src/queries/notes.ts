@@ -92,7 +92,7 @@ export function useCreateNote() {
 
   return useMutation({
     mutationFn: async (
-      note: Omit<Note, 'id' | 'created_at' | 'updated_at'>
+      note: Omit<Note, 'id' | 'created_at' | 'updated_at' | 'latest_commit'>
     ) => {
       const localId = generateLocalId()
       const now = new Date().toISOString()
@@ -102,6 +102,7 @@ export function useCreateNote() {
         id: Date.now(),
         created_at: now,
         updated_at: now,
+        latest_commit: 0,
         syncStatus: 'pending',
         localId,
         serverId: undefined,
@@ -158,6 +159,7 @@ export function useUpdateNote() {
       const localNote = await db.notes.where('id').equals(noteId).first()
       const localId = localNote?.localId
       const serverId = localNote?.serverId
+      const latestCommit = localNote?.latest_commit
 
       await db.notes
         .where('id')
@@ -169,6 +171,11 @@ export function useUpdateNote() {
         })
 
       queryClient.invalidateQueries({ queryKey: noteKeys.all })
+
+      const queueData = { ...note, latest_commit: latestCommit } as Record<
+        string,
+        unknown
+      >
 
       if (isOnline && localId) {
         try {
@@ -188,7 +195,7 @@ export function useUpdateNote() {
               type: 'update',
               entityType: 'note',
               localId,
-              data: note as Record<string, unknown>,
+              data: queueData,
             })
           }
         }
@@ -204,7 +211,7 @@ export function useUpdateNote() {
               type: 'update',
               entityType: 'note',
               serverId,
-              data: note as Record<string, unknown>,
+              data: queueData,
             })
           }
         }
@@ -213,14 +220,14 @@ export function useUpdateNote() {
           type: 'update',
           entityType: 'note',
           localId,
-          data: note as Record<string, unknown>,
+          data: queueData,
         })
       } else if (serverId) {
         await addToSyncQueue({
           type: 'update',
           entityType: 'note',
           serverId,
-          data: note as Record<string, unknown>,
+          data: queueData,
         })
       }
 
