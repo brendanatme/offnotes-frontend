@@ -12,15 +12,32 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
+function storeAuthData(data: {
+  token?: string
+  user_id?: number
+  user?: { id: number }
+}) {
+  if (data.token) {
+    localStorage.setItem('authToken', data.token)
+  }
+  const userId = data.user_id ?? data.user?.id
+  if (userId !== undefined) {
+    localStorage.setItem('userId', String(userId))
+  }
+}
+
+export function getUserId(): number | null {
+  const id = localStorage.getItem('userId')
+  return id ? Number(id) : null
+}
+
 export async function signup(values: { email: string; password: string }) {
   const response = await axios.post(`${API_BASE_URL}/api/users/signup/`, {
     ...values,
     username: values.email,
   })
 
-  if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token)
-  }
+  storeAuthData(response.data)
 
   return response.data
 }
@@ -28,9 +45,7 @@ export async function signup(values: { email: string; password: string }) {
 export async function login(values: { username: string; password: string }) {
   const response = await axios.post(`${API_BASE_URL}/api/users/login/`, values)
 
-  if (response.data.token) {
-    localStorage.setItem('authToken', response.data.token)
-  }
+  storeAuthData(response.data)
 
   return response.data
 }
@@ -101,6 +116,7 @@ export async function deleteNote(noteId: number): Promise<void> {
 
 export async function logout() {
   localStorage.removeItem('authToken')
+  localStorage.removeItem('userId')
   window.location.href = '/'
 }
 

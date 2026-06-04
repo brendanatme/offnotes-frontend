@@ -6,6 +6,7 @@ import {
   createFolder as apiCreateFolder,
   updateFolder as apiUpdateFolder,
   deleteFolder as apiDeleteFolder,
+  getUserId,
 } from '~/api'
 import type { Folder } from '~/interfaces'
 
@@ -75,7 +76,7 @@ export function useCreateFolder() {
 
       const localFolder: SyncableFolder = {
         id: Date.now(),
-        user: null,
+        user: getUserId(),
         name,
         created_at: now,
         updated_at: now,

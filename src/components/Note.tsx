@@ -8,6 +8,7 @@ import {
 } from '~/queries/notes'
 import { db } from '~/db'
 import { Note as NoteInterface } from '~/interfaces'
+import { getUserId } from '~/api'
 import { PlusIcon } from './icons/PlusIcon'
 import { Button } from './Button'
 import { ConfirmDialog } from './ConfirmDialog'
@@ -129,7 +130,7 @@ export default function Note() {
           date,
           content,
           folder: editedNote.folder || selectedFolderId || 1,
-          user: null,
+          user: getUserId(),
         })
         const createdNote = await db.notes
           .where('localId')

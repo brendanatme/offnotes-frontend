@@ -103,7 +103,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       case 'create': {
         const noteData = operation.data as Partial<Note>
         const serverNote = await api.createNote({
-          user: null,
+          user: api.getUserId(),
           folder: noteData?.folder ?? note?.folder ?? 0,
           title: noteData?.title ?? note?.title ?? '',
           date: noteData?.date ?? note?.date ?? '',
