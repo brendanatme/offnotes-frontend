@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as api from '~/api'
 import Login from '~/pages/Login'
 import Notes from '~/pages/Notes'
+import Signup from '~/pages/Signup'
+
+const SIGNUP_ENABLED = import.meta.env.VITE_ENABLE_SIGNUP === 'true'
 import { NotesProvider } from '~/context/notes'
 import { ThemeProvider } from '~/context/theme'
 import { SyncProvider } from '~/sync'
@@ -54,6 +57,9 @@ function App() {
                 <Route path="/" element={<InitialRouter />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/login" element={<Login />} />
+                {SIGNUP_ENABLED && (
+                  <Route path="/signup" element={<Signup />} />
+                )}
               </Routes>
             </NotesProvider>
           </SyncProvider>

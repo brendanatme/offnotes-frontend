@@ -12,6 +12,19 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
+export async function signup(values: { email: string; password: string }) {
+  const response = await axios.post(`${API_BASE_URL}/api/users/signup/`, {
+    ...values,
+    username: values.email,
+  })
+
+  if (response.data.token) {
+    localStorage.setItem('authToken', response.data.token)
+  }
+
+  return response.data
+}
+
 export async function login(values: { username: string; password: string }) {
   const response = await axios.post(`${API_BASE_URL}/api/users/login/`, values)
 
