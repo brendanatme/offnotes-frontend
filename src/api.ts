@@ -12,15 +12,11 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
-function storeAuthData(data: {
-  token?: string
-  user_id?: number
-  user?: { id: number }
-}) {
+function storeAuthData(data: { token?: string; user?: { id: number } }) {
   if (data.token) {
     localStorage.setItem('authToken', data.token)
   }
-  const userId = data.user_id ?? data.user?.id
+  const userId = data.user?.id
   if (userId !== undefined) {
     localStorage.setItem('userId', String(userId))
   }
