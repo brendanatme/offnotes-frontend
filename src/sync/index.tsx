@@ -150,12 +150,18 @@ export function SyncProvider({ children }: { children: ReactNode }) {
                 setConflict(null)
 
                 if (choice === 'local') {
-                  await api.updateNote(note.serverId, updatePayload)
+                  const updatedNote = await api.updateNote(
+                    note.serverId,
+                    updatePayload
+                  )
                   if (operation.localId) {
                     await db.notes
                       .where('localId')
                       .equals(operation.localId)
-                      .modify({ syncStatus: 'synced' as SyncStatus })
+                      .modify({
+                        syncStatus: 'synced' as SyncStatus,
+                        latest_commit: updatedNote.latest_commit,
+                      })
                   }
                 } else {
                   const syncedFields: Partial<SyncableNote> = {
@@ -180,12 +186,18 @@ export function SyncProvider({ children }: { children: ReactNode }) {
               }
             }
 
-            await api.updateNote(note.serverId, updatePayload)
+            const updatedNote = await api.updateNote(
+              note.serverId,
+              updatePayload
+            )
             if (operation.localId) {
               await db.notes
                 .where('localId')
                 .equals(operation.localId)
-                .modify({ syncStatus: 'synced' as SyncStatus })
+                .modify({
+                  syncStatus: 'synced' as SyncStatus,
+                  latest_commit: updatedNote.latest_commit,
+                })
             }
           }
           break
