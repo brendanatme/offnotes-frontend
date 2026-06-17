@@ -22,7 +22,20 @@ export function FoldersSidebarContent() {
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const sortFoldersByDate = (items: Folder[]) =>
+    [...items].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
+  const sortedFolders = sortFoldersByDate(folders)
   const selectedFolder = folders.find((f) => f.id === selectedFolderId) ?? null
+
+  useEffect(() => {
+    if (selectedFolderId === null && sortedFolders.length > 0) {
+      selectFolder(sortedFolders[0].id)
+    }
+  }, [selectedFolderId, sortedFolders, selectFolder])
 
   useEffect(() => {
     if (editingId !== null && inputRef.current) {
@@ -64,15 +77,9 @@ export function FoldersSidebarContent() {
     await deleteFolder.mutateAsync(folderId as number)
   }
 
-  const sortFoldersByDate = (items: Folder[]) =>
-    [...items].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-
   return (
     <SidebarContent<Folder>
-      items={sortFoldersByDate(folders)}
+      items={sortedFolders}
       selectedItem={selectedFolder}
       onSelect={(folder) => selectFolder(folder.id)}
       onDoubleClick={handleDoubleClick}
