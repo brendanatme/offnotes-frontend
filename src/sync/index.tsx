@@ -113,7 +113,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         case 'create': {
           const noteData = operation.data as Partial<Note>
           const serverNote = await api.createNote({
-            user: api.getUserId(),
+            user_id: api.getUserId(),
             folder: noteData?.folder ?? note?.folder ?? 0,
             title: noteData?.title ?? note?.title ?? '',
             date: noteData?.date ?? note?.date ?? '',
@@ -221,18 +221,25 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   )
 
   const updatePendingCount = useCallback(async () => {
-    const count = await db.syncQueue.count()
+    const userId = api.getUserId()
+    const count = userId
+      ? await db.syncQueue.where('userId').equals(userId).count()
+      : 0
     setPendingOperations(count)
   }, [])
 
   const addToSyncQueue = useCallback(
     async (
-      operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>
+      operation: Omit<
+        SyncOperation,
+        'id' | 'timestamp' | 'retryCount' | 'userId'
+      >
     ) => {
       await db.syncQueue.add({
         ...operation,
         timestamp: Date.now(),
         retryCount: 0,
+        userId: api.getUserId(),
       })
       await updatePendingCount()
     },
@@ -246,7 +253,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setIsSyncing(true)
 
     try {
-      const operations = await db.syncQueue.orderBy('timestamp').toArray()
+      const userId = api.getUserId()
+      const operations = userId
+        ? await db.syncQueue.where('userId').equals(userId).sortBy('timestamp')
+        : []
 
       for (const operation of operations) {
         try {

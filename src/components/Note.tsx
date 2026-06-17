@@ -74,13 +74,14 @@ export default function Note() {
       if (contentRef.current) {
         contentRef.current.innerText = editedNote.content || ''
       }
-
-      if (!selectedNote && titleRef.current) {
-        titleRef.current.focus()
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, selectedNote])
+
+  useEffect(() => {
+    if (!isAddingNote) return
+    setTimeout(() => titleRef.current?.focus(), 0)
+  }, [isAddingNote])
 
   const formatDateToYYYYMMDD = (date: Date | string) => {
     const d = typeof date === 'string' ? new Date(date) : date
@@ -130,7 +131,7 @@ export default function Note() {
           date,
           content,
           folder: editedNote.folder || selectedFolderId || 1,
-          user: getUserId(),
+          user_id: getUserId(),
         })
         const createdNote = await db.notes
           .where('localId')

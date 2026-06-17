@@ -21,7 +21,10 @@ export function useFolders() {
   return useQuery({
     queryKey: folderKeys.all,
     queryFn: async () => {
-      const localFolders = await db.folders.toArray()
+      const userId = getUserId()
+      const localFolders = userId
+        ? await db.folders.where('user_id').equals(userId).toArray()
+        : []
 
       if (!isOnline) {
         return localFolders
@@ -47,7 +50,9 @@ export function useFolders() {
           }
         }
 
-        await db.folders.clear()
+        if (userId) {
+          await db.folders.where('user_id').equals(userId).delete()
+        }
         for (const folder of merged) {
           await db.folders.put({
             ...folder,
@@ -56,7 +61,9 @@ export function useFolders() {
           } as SyncableFolder)
         }
 
-        return db.folders.toArray()
+        return userId
+          ? db.folders.where('user_id').equals(userId).toArray()
+          : []
       } catch {
         return localFolders
       }
@@ -76,7 +83,7 @@ export function useCreateFolder() {
 
       const localFolder: SyncableFolder = {
         id: Date.now(),
-        user: getUserId(),
+        user_id: getUserId(),
         name,
         created_at: now,
         updated_at: now,

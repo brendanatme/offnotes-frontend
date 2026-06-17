@@ -8,7 +8,7 @@ export interface User {
 
 export interface Folder {
   id: number
-  user: number | null
+  user_id: number | null
   name: string
   created_at: string
   updated_at: string
@@ -17,7 +17,7 @@ export interface Folder {
 
 export interface Note {
   id: number
-  user: number | null
+  user_id: number | null
   folder: number
   title: string
   date: string

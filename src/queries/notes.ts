@@ -6,6 +6,7 @@ import {
   createNote as apiCreateNote,
   updateNote as apiUpdateNote,
   deleteNote as apiDeleteNote,
+  getUserId,
 } from '~/api'
 import { folderKeys } from './folders'
 import type { Note } from '~/interfaces'
@@ -23,9 +24,11 @@ export function useNotes(folderId?: number) {
     queryFn: async () => {
       if (folderId === undefined) return []
 
+      const userId = getUserId()
       const localNotes = await db.notes
         .where('folder')
         .equals(folderId)
+        .and((n) => n.user_id === userId)
         .toArray()
 
       if (!isOnline) {
@@ -67,7 +70,11 @@ export function useNotes(folderId?: number) {
           }
         }
 
-        await db.notes.where('folder').equals(folderId).delete()
+        await db.notes
+          .where('folder')
+          .equals(folderId)
+          .and((n) => n.user_id === userId)
+          .delete()
         for (const note of merged) {
           await db.notes.put({
             ...note,
@@ -76,7 +83,11 @@ export function useNotes(folderId?: number) {
           } as SyncableNote)
         }
 
-        return db.notes.where('folder').equals(folderId).toArray()
+        return db.notes
+          .where('folder')
+          .equals(folderId)
+          .and((n) => n.user_id === userId)
+          .toArray()
       } catch {
         return localNotes
       }

@@ -26,6 +26,7 @@ export interface SyncOperation {
   data?: Record<string, unknown>
   timestamp: number
   retryCount: number
+  userId?: number | null
 }
 
 class OfflineDatabase extends Dexie {
@@ -43,6 +44,37 @@ class OfflineDatabase extends Dexie {
       syncQueue: '++id, entityType, localId, timestamp',
       metadata: 'key',
     })
+
+    this.version(2).stores({
+      folders: 'id, name, syncStatus, localId, serverId, user',
+      notes: 'id, folder, syncStatus, localId, serverId, date, user',
+      syncQueue: '++id, entityType, localId, timestamp, userId',
+      metadata: 'key',
+    })
+
+    this.version(3)
+      .stores({
+        folders: 'id, name, syncStatus, localId, serverId, user_id',
+        notes: 'id, folder, syncStatus, localId, serverId, date, user_id',
+        syncQueue: '++id, entityType, localId, timestamp, userId',
+        metadata: 'key',
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table('folders')
+          .toCollection()
+          .modify((folder: SyncableFolder & { user?: number | null }) => {
+            folder.user_id = folder.user ?? null
+            delete folder.user
+          })
+        await tx
+          .table('notes')
+          .toCollection()
+          .modify((note: SyncableNote & { user?: number | null }) => {
+            note.user_id = note.user ?? null
+            delete note.user
+          })
+      })
   }
 }
 
