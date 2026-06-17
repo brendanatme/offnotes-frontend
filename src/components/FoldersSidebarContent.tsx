@@ -41,10 +41,10 @@ export function FoldersSidebarContent() {
     setEditValue(folder.name)
   }
 
-  const handleRename = async (folderId: number) => {
+  const handleRename = async (folderId: number | string) => {
     if (editValue.trim()) {
       await updateFolder.mutateAsync({
-        folderId,
+        folderId: folderId as number,
         folder: { name: editValue.trim() },
       })
     }
@@ -60,8 +60,8 @@ export function FoldersSidebarContent() {
     setEditValue('')
   }
 
-  const handleDelete = async (folderId: number) => {
-    await deleteFolder.mutateAsync(folderId)
+  const handleDelete = async (folderId: number | string) => {
+    await deleteFolder.mutateAsync(folderId as number)
   }
 
   const sortFoldersByDate = (items: Folder[]) =>

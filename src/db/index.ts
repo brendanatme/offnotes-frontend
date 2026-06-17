@@ -59,6 +59,7 @@ class OfflineDatabase extends Dexie {
         syncQueue: '++id, entityType, localId, timestamp, userId',
         metadata: 'key',
       })
+
       .upgrade(async (tx) => {
         await tx
           .table('folders')

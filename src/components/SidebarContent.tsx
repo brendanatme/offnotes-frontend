@@ -3,7 +3,7 @@ import { ConfirmDialog } from './ConfirmDialog'
 import { useClickOutside } from '~/hooks/useClickOutside'
 
 interface HasId {
-  id: number
+  id: number | string
 }
 
 interface SidebarContentProps<T extends HasId> {
@@ -11,13 +11,13 @@ interface SidebarContentProps<T extends HasId> {
   selectedItem: T | null
   onSelect: (item: T) => void
   onDoubleClick?: (item: T) => void
-  isEditing?: number | null
+  isEditing?: number | string | null
   editValue?: string
   setEditValue?: (value: string) => void
   inputRef?: RefObject<HTMLInputElement | null>
-  onEditSubmit?: (id: number) => void
+  onEditSubmit?: (id: number | string) => void
   onEditCancel?: () => void
-  onDelete?: (id: number) => void
+  onDelete?: (id: number | string) => void
   isAdding?: boolean
   onAddSubmit?: () => void
   onAddCancel?: () => void

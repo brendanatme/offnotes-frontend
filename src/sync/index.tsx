@@ -124,9 +124,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
               .where('localId')
               .equals(operation.localId)
               .modify({
-                id: serverNote.id,
+                id: serverNote.id as number,
                 syncStatus: 'synced' as SyncStatus,
-                serverId: serverNote.id,
+                serverId: serverNote.id as number,
               })
           }
           break
@@ -161,7 +161,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
                   const syncedFields: Partial<SyncableNote> = {
                     ...serverNote,
                     syncStatus: 'synced',
-                    serverId: serverNote.id,
+                    serverId: serverNote.id as number,
                   }
                   if (operation.localId) {
                     await db.notes

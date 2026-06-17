@@ -8,11 +8,11 @@ import {
 
 export interface NotesContextType {
   selectedFolderId: number | null
-  selectedNoteId: number | null
+  selectedNoteId: number | string | null
   isAddingNote: boolean
   isAddingFolder: boolean
   selectFolder: (folderId: number | null) => void
-  selectNote: (noteId: number | null) => void
+  selectNote: (noteId: number | string | null) => void
   startAddNote: () => void
   stopAddNote: () => void
   startAddFolder: () => void
@@ -23,7 +23,9 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined)
 
 export const NotesProvider = ({ children }: { children: ReactNode }) => {
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null)
-  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null)
+  const [selectedNoteId, setSelectedNoteId] = useState<number | string | null>(
+    null
+  )
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [isAddingFolder, setIsAddingFolder] = useState(false)
 
@@ -32,7 +34,7 @@ export const NotesProvider = ({ children }: { children: ReactNode }) => {
     setSelectedNoteId(null)
   }, [])
 
-  const selectNote = useCallback((noteId: number | null) => {
+  const selectNote = useCallback((noteId: number | string | null) => {
     setSelectedNoteId(noteId)
     setIsAddingNote(false)
   }, [])

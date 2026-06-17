@@ -48,7 +48,7 @@ export function useNotes(folderId?: number) {
           ...serverNotes.map((s) => ({
             ...s,
             syncStatus: 'synced' as const,
-            serverId: s.id,
+            serverId: s.id as number,
           })),
         ]
         for (const local of localPendingEdits) {
@@ -110,7 +110,7 @@ export function useCreateNote() {
 
       const localNote: SyncableNote = {
         ...note,
-        id: Date.now(),
+        id: `local${Date.now()}`,
         created_at: now,
         updated_at: now,
         latest_commit: 0,
@@ -124,11 +124,14 @@ export function useCreateNote() {
       if (isOnline) {
         try {
           const serverNote = await apiCreateNote(note)
-          await db.notes.where('localId').equals(localId).modify({
-            id: serverNote.id,
-            syncStatus: 'synced',
-            serverId: serverNote.id,
-          })
+          await db.notes
+            .where('localId')
+            .equals(localId)
+            .modify({
+              id: serverNote.id as number,
+              syncStatus: 'synced',
+              serverId: serverNote.id as number,
+            })
         } catch {
           await addToSyncQueue({
             type: 'create',
@@ -164,7 +167,7 @@ export function useUpdateNote() {
       noteId,
       note,
     }: {
-      noteId: number
+      noteId: number | string
       note: Partial<Note>
     }) => {
       const localNote = await db.notes.where('id').equals(noteId).first()
@@ -284,7 +287,7 @@ export function useDeleteNote() {
   const { addToSyncQueue, isOnline } = useSync()
 
   return useMutation({
-    mutationFn: async (noteId: number) => {
+    mutationFn: async (noteId: number | string) => {
       const localNote = await db.notes.where('id').equals(noteId).first()
       const localId = localNote?.localId
       const serverId = localNote?.serverId

@@ -16,7 +16,7 @@ export interface Folder {
 }
 
 export interface Note {
-  id: number
+  id: number | string
   user_id: number | null
   folder: number
   title: string
