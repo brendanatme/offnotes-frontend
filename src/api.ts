@@ -5,6 +5,17 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 axios.interceptors.request.use((config) => {
+  const url = config.url ?? ''
+  const isAuthRequest =
+    url.includes('/api/users/signup/') || url.includes('/api/users/login/')
+
+  if (!isAuthRequest && !localStorage.getItem('userId')) {
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('userId')
+    window.location.href = '/'
+    return Promise.reject(new Error('No user session'))
+  }
+
   const token = localStorage.getItem('authToken')
   if (token) {
     config.headers['Authorization'] = `Token ${token}`
