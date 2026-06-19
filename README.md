@@ -1,16 +1,67 @@
-# React + Vite
+# Offnotes-frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Repo for the frontend of the OffNotes project.
 
-Currently, two official plugins are available:
+## System Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js v24+
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- ```bash
+  npm install
+  ```
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Run dev server
+
+- ```bash
+  npm run dev
+  ```
+
+---
+
+## How OffNotes Sync Works
+
+### The Core Idea: Write Locally First, Sync Later
+
+When you create, edit, or delete a note or folder, the app **immediately saves the change to a local database in your browser** (called IndexedDB, via a library called Dexie). You never have to wait for a server response — your action is instant.
+
+At the same time, the app adds a "work order" to a **sync queue** — a list of things that still need to be sent to the server.
+
+---
+
+### The Sync Queue
+
+Think of the sync queue like a **to-do list for the server**. Each item says things like:
+- *"Create this folder on the server"*
+- *"Update note #42 with this new content"*
+- *"Delete folder #7"*
+
+These queue items are also stored locally, so they survive a page refresh or browser close.
+
+---
+
+### When Does Syncing Happen?
+
+- **When you come back online** — the app listens for the browser's `online`/`offline` events and automatically starts draining the queue the moment connectivity returns.
+- **You can also force it** via `forceSync()`.
+
+The app processes queue items **in order** (oldest first), one at a time. If one fails, it retries up to **3 times** before giving up and logging an error.
+
+---
+
+### The ID Problem (Local vs. Server IDs)
+
+When you create something offline, it doesn't have a real server ID yet — so the app generates a temporary **local ID** (a timestamp + random string). Once the server successfully creates the record and returns a real ID, the local record gets updated with the server's ID. From that point on, updates and deletes use the server ID.
+
+---
+
+### Conflict Handling
+
+If you edited a note offline, but someone else (or another device) also edited it on the server in the meantime, the app detects the conflict by comparing **commit versions**. It then shows you a **conflict modal** asking: *"Keep your local version, or use the server version?"* — and applies whichever you choose.
+
+---
+
+**TL;DR:** Every action saves locally and queues a server sync. When online, the queue drains automatically. Conflicts prompt you to choose a winner.
