@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, waitFor, within } from 'storybook/test'
 import { SyncStatus } from './SyncStatus'
 import { SyncContext } from '~/sync'
 import {
@@ -24,6 +25,10 @@ export const Online: Story = {
       </SyncContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByTitle('Online')).toBeInTheDocument()
+  },
 }
 
 export const Offline: Story = {
@@ -34,6 +39,10 @@ export const Offline: Story = {
       </SyncContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByTitle('Offline')).toBeInTheDocument()
+  },
 }
 
 export const Syncing: Story = {
@@ -44,6 +53,11 @@ export const Syncing: Story = {
       </SyncContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      expect(canvasElement.querySelector('.animate-spin')).not.toBeNull()
+    })
+  },
 }
 
 export const WithPendingOperations: Story = {
@@ -54,4 +68,8 @@ export const WithPendingOperations: Story = {
       </SyncContext.Provider>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByText('(3 pending)')).toBeInTheDocument()
+  },
 }

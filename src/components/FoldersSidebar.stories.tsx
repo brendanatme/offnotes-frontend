@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, within } from 'storybook/test'
 import { FoldersSidebar } from './FoldersSidebar'
 import { AppProviders, makeQueryClient, syncOffline } from '~/stories/mocks'
 
@@ -18,6 +19,12 @@ export const Default: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(await canvas.findByText('Work')).toBeInTheDocument()
+    expect(canvas.getByText('Personal')).toBeInTheDocument()
+    expect(canvas.getByText('Projects')).toBeInTheDocument()
+  },
 }
 
 export const Offline: Story = {
@@ -28,6 +35,10 @@ export const Offline: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(await canvas.findByText('Work')).toBeInTheDocument()
+  },
 }
 
 export const Empty: Story = {
@@ -38,4 +49,11 @@ export const Empty: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByText('Folders')).toBeInTheDocument()
+    expect(
+      canvas.queryByRole('button', { name: /Work/ })
+    ).not.toBeInTheDocument()
+  },
 }

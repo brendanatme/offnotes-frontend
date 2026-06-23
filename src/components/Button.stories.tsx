@@ -1,10 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { Button } from './Button'
 
 const meta = {
   title: 'Components/Button',
   component: Button,
-  args: { children: 'Button' },
+  args: {
+    children: 'Button',
+    onClick: fn(),
+  },
 } satisfies Meta<typeof Button>
 
 export default meta
@@ -12,6 +16,11 @@ type Story = StoryObj<typeof meta>
 
 export const Primary: Story = {
   args: { kind: 'primary' },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button'))
+    expect(args.onClick).toHaveBeenCalledOnce()
+  },
 }
 
 export const Secondary: Story = {
@@ -48,6 +57,13 @@ export const Large: Story = {
 
 export const Disabled: Story = {
   args: { disabled: true },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button')
+    expect(button).toBeDisabled()
+    await userEvent.click(button)
+    expect(args.onClick).not.toHaveBeenCalled()
+  },
 }
 
 export const WithIcon: Story = {
@@ -59,5 +75,10 @@ export const WithIcon: Story = {
     ),
     kind: 'primary',
     size: 'sm',
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button'))
+    expect(args.onClick).toHaveBeenCalledOnce()
   },
 }

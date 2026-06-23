@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, within } from 'storybook/test'
 import { NotesSidebarContent } from './NotesSidebarContent'
 import {
   AppProviders,
@@ -25,6 +26,11 @@ export const Default: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(await canvas.findByText('Meeting Notes')).toBeInTheDocument()
+    expect(canvas.getByText('Feature Ideas')).toBeInTheDocument()
+  },
 }
 
 export const WithSelectedNote: Story = {
@@ -37,6 +43,13 @@ export const WithSelectedNote: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const meetingNotesButton = await canvas.findByRole('button', {
+      name: /Meeting Notes/,
+    })
+    expect(meetingNotesButton).toHaveClass('bg-neutral-200')
+  },
 }
 
 export const Empty: Story = {
@@ -49,4 +62,10 @@ export const Empty: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(
+      canvas.queryByRole('button', { name: /Meeting Notes/ })
+    ).not.toBeInTheDocument()
+  },
 }

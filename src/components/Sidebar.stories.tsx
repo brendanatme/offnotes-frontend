@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, within } from 'storybook/test'
 import { Sidebar } from './Sidebar'
 import { FolderIcon } from './icons/FolderIcon'
 import { PaperIcon } from './icons/PaperIcon'
@@ -34,7 +35,17 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByText('Folders')).toBeInTheDocument()
+
+    await userEvent.click(
+      canvas.getByRole('button', { name: /Collapse folders/i })
+    )
+    expect(canvas.queryByText('Folders')).not.toBeInTheDocument()
+  },
+}
 
 export const WithActionButton: Story = {
   args: {
@@ -44,6 +55,17 @@ export const WithActionButton: Story = {
         Add
       </Button>
     ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByRole('button', { name: /Add/i })).toBeInTheDocument()
+
+    await userEvent.click(
+      canvas.getByRole('button', { name: /Collapse folders/i })
+    )
+    expect(
+      canvas.queryByRole('button', { name: /^Add$/i })
+    ).not.toBeInTheDocument()
   },
 }
 
@@ -76,5 +98,10 @@ export const Notes: Story = {
         Add
       </Button>
     ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByText('Notes')).toBeInTheDocument()
+    expect(canvas.getByText('Meeting Notes')).toBeInTheDocument()
   },
 }

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { ConflictModal } from './ConflictModal'
 import type { SyncableNote } from '~/db'
 
@@ -38,7 +39,7 @@ const meta = {
     conflict: {
       localNote,
       serverNote,
-      resolve: () => {},
+      resolve: fn(),
     },
   },
 } satisfies Meta<typeof ConflictModal>
@@ -46,14 +47,31 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ args }) => {
+    const body = within(document.body)
+    await userEvent.click(body.getByRole('button', { name: 'Keep mine' }))
+    expect(args.conflict.resolve).toHaveBeenCalledWith('local')
+
+    await userEvent.click(body.getByRole('button', { name: 'Keep theirs' }))
+    expect(args.conflict.resolve).toHaveBeenCalledWith('server')
+  },
+}
 
 export const EmptyContent: Story = {
   args: {
     conflict: {
       localNote: { ...localNote, content: '' },
       serverNote: { ...serverNote, content: '' },
-      resolve: () => {},
+      resolve: fn(),
     },
+  },
+  play: async ({ args }) => {
+    const body = within(document.body)
+    const noContentElements = body.getAllByText('No content')
+    expect(noContentElements).toHaveLength(2)
+
+    await userEvent.click(body.getByRole('button', { name: 'Keep mine' }))
+    expect(args.conflict.resolve).toHaveBeenCalledWith('local')
   },
 }

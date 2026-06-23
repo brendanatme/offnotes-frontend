@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useRef } from 'react'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import { SidebarContent } from './SidebarContent'
 import type { Folder } from '~/interfaces'
 
@@ -38,7 +39,7 @@ const meta = {
   args: {
     items: mockFolders,
     selectedItem: null,
-    onSelect: () => {},
+    onSelect: fn(),
     getLabel: (f) => f.name,
     getSubtitle: (f) => `(${f.notes_count})`,
   },
@@ -46,16 +47,36 @@ const meta = {
 
 export default meta
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole('button', { name: /Work/ }))
+    expect(args.onSelect).toHaveBeenCalledWith(mockFolders[0])
+  },
+}
 
 export const WithSelectedItem: Story = {
   args: {
     selectedItem: mockFolders[0],
   },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.getByRole('button', { name: /Work/ })).toHaveClass(
+      'bg-neutral-200'
+    )
+
+    await userEvent.click(canvas.getByRole('button', { name: /Personal/ }))
+    expect(args.onSelect).toHaveBeenCalledWith(mockFolders[1])
+  },
 }
 
 export const WithEditingItem: Story = {
-  render: () => {
+  args: {
+    onEditSubmit: fn(),
+    onEditCancel: fn(),
+    onDelete: fn(),
+  },
+  render: (args) => {
     const inputRef = useRef<HTMLInputElement>(null)
     return (
       <SidebarContent<Folder>
@@ -68,16 +89,28 @@ export const WithEditingItem: Story = {
         editValue="Work Renamed"
         setEditValue={() => {}}
         inputRef={inputRef}
-        onEditSubmit={() => {}}
-        onEditCancel={() => {}}
-        onDelete={() => {}}
+        onEditSubmit={args.onEditSubmit}
+        onEditCancel={args.onEditCancel}
+        onDelete={args.onDelete}
       />
     )
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByRole('textbox')
+    expect(input).toHaveValue('Work Renamed')
+    await userEvent.click(input)
+    await userEvent.keyboard('{Enter}')
+    expect(args.onEditSubmit).toHaveBeenCalledWith(1)
   },
 }
 
 export const WithAddingItem: Story = {
-  render: () => {
+  args: {
+    onAddSubmit: fn(),
+    onAddCancel: fn(),
+  },
+  render: (args) => {
     const inputRef = useRef<HTMLInputElement>(null)
     return (
       <SidebarContent<Folder>
@@ -90,10 +123,18 @@ export const WithAddingItem: Story = {
         editValue=""
         setEditValue={() => {}}
         inputRef={inputRef}
-        onAddSubmit={() => {}}
-        onAddCancel={() => {}}
+        onAddSubmit={args.onAddSubmit}
+        onAddCancel={args.onAddCancel}
       />
     )
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement)
+    const addInput = canvas.getByPlaceholderText('New folder name')
+    expect(addInput).toBeInTheDocument()
+    await userEvent.click(addInput)
+    await userEvent.keyboard('{Escape}')
+    expect(args.onAddCancel).toHaveBeenCalledOnce()
   },
 }
 
@@ -101,5 +142,9 @@ export const Empty: Story = {
   args: {
     items: [],
     selectedItem: null,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(canvas.queryByRole('button')).not.toBeInTheDocument()
   },
 }

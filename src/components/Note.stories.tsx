@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { expect, userEvent, within } from 'storybook/test'
 import Note from './Note'
 import {
   AppProviders,
@@ -25,6 +26,17 @@ export const EmptyState: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const addButton = await canvas.findByRole('button', { name: /Add a Note/i })
+    expect(addButton).toBeInTheDocument()
+
+    await userEvent.click(addButton)
+    expect(
+      await canvas.findByRole('button', { name: 'Save' })
+    ).toBeInTheDocument()
+    expect(canvas.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
+  },
 }
 
 export const ViewMode: Story = {
@@ -39,6 +51,18 @@ export const ViewMode: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(
+      await canvas.findByRole('heading', { name: 'Meeting Notes', level: 1 })
+    ).toBeInTheDocument()
+    expect(canvas.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit' }))
+    expect(
+      await canvas.findByRole('button', { name: 'Save' })
+    ).toBeInTheDocument()
+  },
 }
 
 export const AddMode: Story = {
@@ -53,4 +77,16 @@ export const AddMode: Story = {
       </AppProviders>
     ),
   ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    expect(
+      await canvas.findByRole('button', { name: 'Save' })
+    ).toBeInTheDocument()
+    expect(canvas.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
+    expect(
+      await canvas.findByRole('button', { name: /Add a Note/i })
+    ).toBeInTheDocument()
+  },
 }
