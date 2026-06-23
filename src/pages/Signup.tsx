@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import { useMutation } from '@tanstack/react-query'
 import * as api from '../api'
+import { AuthSidebar } from '~/components/AuthSidebar'
 
 function Signup() {
   const navigate = useNavigate()
@@ -28,6 +29,7 @@ function Signup() {
 
   return (
     <div className="flex h-screen w-screen bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white">
+      <AuthSidebar />
       <div className="flex-1 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-semibold mb-6">Sign Up</h1>
         <form

@@ -25,14 +25,15 @@ export interface SyncState {
   lastSyncTime: number | null
 }
 
-interface SyncContextType extends SyncState {
+export interface SyncContextType extends SyncState {
   addToSyncQueue: (
     operation: Omit<SyncOperation, 'id' | 'timestamp' | 'retryCount'>
   ) => Promise<void>
   forceSync: () => Promise<void>
 }
 
-const SyncContext = createContext<SyncContextType | undefined>(undefined)
+// eslint-disable-next-line react-refresh/only-export-components
+export const SyncContext = createContext<SyncContextType | undefined>(undefined)
 
 const MAX_RETRY_COUNT = 3
 
