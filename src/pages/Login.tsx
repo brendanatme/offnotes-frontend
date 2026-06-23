@@ -3,6 +3,8 @@ import { useFormik } from 'formik'
 import { useMutation } from '@tanstack/react-query'
 import * as api from '../api'
 import { AuthSidebar } from '~/components/AuthSidebar'
+import { Button } from '~/components/Button'
+import { Input } from '~/components/Input'
 
 const SIGNUP_ENABLED = import.meta.env.VITE_ENABLE_SIGNUP === 'true'
 
@@ -38,31 +40,30 @@ function Login() {
           onSubmit={formik.handleSubmit}
           className="flex flex-col gap-4 w-64"
         >
-          <input
+          <Input
             type="text"
             name="username"
             placeholder="Username"
             onChange={formik.handleChange}
             value={formik.values.username}
-            className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white"
             required
           />
-          <input
+          <Input
             type="password"
             name="password"
             placeholder="Password"
             onChange={formik.handleChange}
             value={formik.values.password}
-            className="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white"
             required
           />
-          <button
+          <Button
             type="submit"
+            kind="secondary"
             disabled={mutation.isPending}
-            className="px-3 py-2 bg-neutral-200 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors cursor-pointer disabled:opacity-50 text-neutral-900 dark:text-white"
+            className="w-full justify-center"
           >
             {mutation.isPending ? 'Signing in...' : 'Sign In'}
-          </button>
+          </Button>
         </form>
         {SIGNUP_ENABLED && (
           <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
