@@ -112,7 +112,7 @@ export function SidebarContent<T extends HasId>({
                   >
                     <button
                       type="button"
-                      className="flex-shrink-0 p-1 text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 cursor-pointer"
+                      className="shrink-0 p-1 text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 cursor-pointer"
                       onClick={() => setIsDeleting(true)}
                     >
                       <svg

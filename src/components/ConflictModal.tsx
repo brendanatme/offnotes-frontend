@@ -34,7 +34,7 @@ export function ConflictModal({ conflict }: ConflictModalProps) {
             <div className="font-medium text-neutral-900 dark:text-white">
               {localNote.title}
             </div>
-            <div className="text-sm text-neutral-600 dark:text-neutral-300 max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
+            <div className="text-sm text-neutral-600 dark:text-neutral-300 max-h-48 overflow-y-auto whitespace-pre-wrap wrap-break-word">
               {localNote.content || (
                 <span className="italic text-neutral-400">No content</span>
               )}
@@ -56,7 +56,7 @@ export function ConflictModal({ conflict }: ConflictModalProps) {
             <div className="font-medium text-neutral-900 dark:text-white">
               {serverNote.title}
             </div>
-            <div className="text-sm text-neutral-600 dark:text-neutral-300 max-h-48 overflow-y-auto whitespace-pre-wrap break-words">
+            <div className="text-sm text-neutral-600 dark:text-neutral-300 max-h-48 overflow-y-auto whitespace-pre-wrap wrap-break-word">
               {serverNote.content || (
                 <span className="italic text-neutral-400">No content</span>
               )}
